@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - QA System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f5f5; }
+    .header { background: #667eea; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 1.3rem; }
+    .header button { background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; }
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .card h2 { color: #333; margin-bottom: 1rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem; font-size: 1.1rem; }
+    .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .form-group { margin-bottom: 0.5rem; }
+    .form-group label { display: block; margin-bottom: 0.3rem; color: #555; font-weight: 500; font-size: 0.85rem; }
+    .form-group select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; font-size: 0.9rem; }
+    .btn { padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; }
+    .btn:hover { background: #5568d3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.6rem; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+    th { background: #f8f9fa; font-weight: 600; color: #555; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .stat-box { background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center; }
+    .stat-box .label { font-size: 0.8rem; color: #666; }
+    .stat-box .value { font-size: 1.5rem; font-weight: bold; color: #667eea; }
+    .nav { display: flex; gap: 1rem; }
+    .nav a { color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; }
+    .nav a:hover { background: rgba(255,255,255,0.2); }
+    .filter-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+    .center-select { min-width: 200px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>QA Dashboard</h1>
+    <div class="nav">
+      <a href="/admin">Admin</a>
+      <a href="/diagnostic-center">Data Entry</a>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <h2>Filter Data</h2>
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Diagnostic Center</label>
+          <select id="filterCenter" class="center-select">
+            <option value="">All Centers</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Month</label>
+          <select id="filterMonth">
+            <option value="">All Months</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <select id="filterYear"></select>
+        </div>
+        <button class="btn" onclick="loadData()">Apply Filters</button>
+        <button class="btn" onclick="exportToExcel()" style="background: #28a745;">Export to Excel</button>
+      </div>
+    </div>
+    
+    <div class="stats-grid" id="statsGrid"></div>
+    
+    <div class="card">
+      <h2>QA Data Report</h2>
+      <div style="overflow-x: auto;">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Center</th>
+              <th>Department</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Total Specimen</th>
+              <th>Total QC</th>
+              <th>Failed QC</th>
+              <th>% Accept</th>
+              <th>Panic Results</th>
+              <th>Informed</th>
+              <th>Rejected</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let userRole = '';
+    let allData = [];
+    
+    async function checkAuth() {
+      const res = await fetch('/api/user');
+      if (res.status === 401) window.location.href = '/login';
+      const data = await res.json();
+      userRole = data.role;
+      document.getElementById('filterCenter').innerHTML = data.role === 'admin' ? 
+        '<option value="">All Centers</option>' : `<option value="${data.diagnostic_center}">${data.diagnostic_center}</option>`;
+    }
+    
+    document.getElementById('filterYear').innerHTML = Array.from({length: 5}, (_, i) => {
+      const y = new Date().getFullYear() - i;
+      return `<option value="${y}">${y}</option>`;
+    }).join('') + `<option value="${new Date().getFullYear()}" selected>${new Date().getFullYear()}</option>`;
+    
+    async function loadData() {
+      const center = document.getElementById('filterCenter').value;
+      const month = document.getElementById('filterMonth').value;
+      const year = document.getElementById('filterYear').value;
+      
+      let url = '/api/qa-data';
+      const params = new URLSearchParams();
+      if (center) params.append('diagnostic_center', center);
+      if (month) params.append('month', month);
+      if (year) params.append('year', year);
+      if (params.toString()) url += '?' + params.toString();
+      
+      const res = await fetch(url);
+      allData = await res.json();
+      renderTable();
+      calculateStats();
+    }
+    
+    function renderTable() {
+      document.getElementById('tableBody').innerHTML = allData.map(d => {
+        const acceptRate = d.total_qc > 0 ? ((d.total_qc - d.total_failed_qc) / d.total_qc * 100).toFixed(1) : 0;
+        return `
+          <tr>
+            <td>${d.diagnostic_center}</td>
+            <td>${d.department}</td>
+            <td>${d.month}</td>
+            <td>${d.year}</td>
+            <td>${d.total_specimen || 0}</td>
+            <td>${d.total_qc || 0}</td>
+            <td>${d.total_failed_qc || 0}</td>
+            <td>${acceptRate}%</td>
+            <td>${d.total_panic_result || 0}</td>
+            <td>${d.informed_panic_results || 0}</td>
+            <td>${d.rejected_sample || 0}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+    
+    function calculateStats() {
+      const totalSpecimen = allData.reduce((sum, d) => sum + (d.total_specimen || 0), 0);
+      const totalQC = allData.reduce((sum, d) => sum + (d.total_qc || 0), 0);
+      const failedQC = allData.reduce((sum, d) => sum + (d.total_failed_qc || 0), 0);
+      const panicResults = allData.reduce((sum, d) => sum + (d.total_panic_result || 0), 0);
+      const rejected = allData.reduce((sum, d) => sum + (d.rejected_sample || 0), 0);
+      const acceptRate = totalQC > 0 ? ((totalQC - failedQC) / totalQC * 100).toFixed(1) : 0;
+      
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-box"><div class="label">Total Specimen</div><div class="value">${totalSpecimen.toLocaleString()}</div></div>
+        <div class="stat-box"><div class="label">Total QC</div><div class="value">${totalQC.toLocaleString()}</div></div>
+        <div class="stat-box"><div class="label">Failed QC</div><div class="value">${failedQC.toLocaleString()}</div></div>
+        <div class="stat-box"><div class="label">% Acceptance</div><div class="value">${acceptRate}%</div></div>
+        <div class="stat-box"><div class="label">Panic Results</div><div class="value">${panicResults.toLocaleString()}</div></div>
+        <div class="stat-box"><div class="label">Rejected Samples</div><div class="value">${rejected.toLocaleString()}</div></div>
+      `;
+    }
+    
+    function exportToExcel() {
+      let csv = 'Center,Department,Month,Year,Total Specimen,Stat Specimen,Total QC,Failed QC,% Acceptance,Panic Results,Informed Panic,Not Informed Panic,Rejected,Hemolysed,Unsatisfactory,Shipment Verification,QC LOT Verification,EQA\n';
+      
+      allData.forEach(d => {
+        const acceptRate = d.total_qc > 0 ? ((d.total_qc - d.total_failed_qc) / d.total_qc * 100).toFixed(1) : 0;
+        csv += `"${d.diagnostic_center}","${d.department}","${d.month}",${d.year},${d.total_specimen||0},${d.total_stat_specimen||0},${d.total_qc||0},${d.total_failed_qc||0},${acceptRate}%,${d.total_panic_result||0},${d.informed_panic_results||0},${d.not_informed_panic_results||0},${d.rejected_sample||0},${d.hemolysed_sample||0},${d.unsatisfactory_sample||0},${d.shipment_verification||0},${d.qc_lot_verification||0},"${d.eqa||''}"\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'QA_Report_' + new Date().toISOString().split('T')[0] + '.csv';
+      a.click();
+    }
+    
+    async function logout() {
+      await fetch('/api/logout');
+      window.location.href = '/login';
+    }
+    
+    checkAuth();
+    loadData();
+  </script>
+</body>
+</html>

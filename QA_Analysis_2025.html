@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rawalpindi Diagnostic Center - QA Analysis 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        h1 { color: #2c3e50; text-align: center; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .chart-container { position: relative; height: 300px; margin: 20px 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .stat-box { background: #ecf0f1; padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-box .value { font-size: 24px; font-weight: bold; color: #2980b9; }
+        .stat-box .label { font-size: 12px; color: #7f8c8d; }
+        .warning { color: #e74c3c; font-weight: bold; }
+        .good { color: #27ae60; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
+        th { background: #3498db; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .nav { position: sticky; top: 0; background: #2c3e50; padding: 10px; z-index: 100; }
+        .nav a { color: white; margin: 0 15px; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="#overview">Overview</a>
+        <a href="#hematology">Hematology</a>
+        <a href="#chemistry">Chemistry</a>
+        <a href="#microbiology">Microbiology</a>
+        <a href="#other">Other Sections</a>
+    </div>
+
+    <h1>🏥 Rawalpindi Diagnostic Center<br>Annual QA Analysis - 2025</h1>
+
+    <div class="section" id="overview">
+        <h2>📊 Overall Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">324,119</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">118</div>
+                <div class="label">Total Rejected</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">0.036%</div>
+                <div class="label">Rejection Rate</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">93.1%</div>
+                <div class="label">Avg QC Acceptance</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="monthlyTrendChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="departmentPieChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section" id="hematology">
+        <h2>🩸 Hematology</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">111,307</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">80</div>
+                <div class="label">Rejected Samples</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">90.9%</div>
+                <div class="label">QC Acceptance (Target >95%)</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">98.3%</div>
+                <div class="label">Panic Notification Rate</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="hematologyChart"></canvas>
+        </div>
+        
+        <h3>⚠️ Issues Detected</h3>
+        <ul>
+            <li><span class="warning">April 2025:</span> 0% QC Acceptance (190 failed out of 500) - <strong>Data Entry Error suspected</strong></li>
+            <li><span class="warning">December 2025:</span> Lowest QC Acceptance at 96.7%</li>
+            <li>15 panic results not informed throughout the year</li>
+        </ul>
+        
+        <table>
+            <tr><th>Month</th><th>Specimens</th><th>QC Failed</th><th>QC Acceptance</th><th>Panic Results</th></tr>
+            <tr><td>Jan</td><td>8,801</td><td>0</td><td class="good">100%</td><td>18</td></tr>
+            <tr><td>Feb</td><td>8,339</td><td>0</td><td class="good">100%</td><td>13</td></tr>
+            <tr><td>Mar</td><td>6,701</td><td>0</td><td class="good">100%</td><td>28</td></tr>
+            <tr><td>Apr</td><td>8,862</td><td>190</td><td class="warning">0%</td><td>100%</td></tr>
+            <tr><td>May</td><td>9,195</td><td>2</td><td class="good">98.3%</td><td>14</td></tr>
+            <tr><td>Jun</td><td>8,028</td><td>0</td><td class="good">100%</td><td>15</td></tr>
+            <tr><td>Jul</td><td>9,850</td><td>0</td><td class="good">100%</td><td>18</td></tr>
+            <tr><td>Aug</td><td>10,614</td><td>0</td><td class="good">100%</td><td>28</td></tr>
+            <tr><td>Sep</td><td>12,308</td><td>2</td><td class="good">98.3%</td><td>22</td></tr>
+            <tr><td>Oct</td><td>12,936</td><td>0</td><td class="good">100%</td><td>36</td></tr>
+            <tr><td>Nov</td><td>11,551</td><td>2</td><td class="good">98.3%</td><td>22</td></tr>
+            <tr><td>Dec</td><td>10,162</td><td>6</td><td class="warning">96.7%</td><td>16</td></tr>
+        </table>
+    </div>
+
+    <div class="section" id="chemistry">
+        <h2>🧪 Chemistry (Routine + Special)</h2>
+        
+        <h3>Routine Chemistry</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">106,357</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">88.8%</div>
+                <div class="label">Avg QC Acceptance</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">100%</div>
+                <div class="label">Panic Notification</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">82.3%</div>
+                <div class="label">Dec QC (Lowest)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="routineChemChart"></canvas>
+        </div>
+        
+        <h3>Special Chemistry</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">60,944</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">90.5%</div>
+                <div class="label">Avg QC Acceptance</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">100%</div>
+                <div class="label">Panic Notification</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">81%</div>
+                <div class="label">Feb QC (Lowest)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="specialChemChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section" id="microbiology">
+        <h2>🦠 Microbiology</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">42,882</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">99.7%</div>
+                <div class="label">QC Acceptance</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">5</div>
+                <div class="label">Rejected Samples</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">Oct</div>
+                <div class="label">0% QC (Issue)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="microbiologyChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section" id="other">
+        <h2>🔬 Molecular Pathology & Histopathology</h2>
+        
+        <h3>Molecular Pathology</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">620</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0%</div>
+                <div class="label">QC Performed</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0%</div>
+                <div class="label">External QA</div>
+            </div>
+        </div>
+        
+        <h3>Histopathology</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">2,009</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0%</div>
+                <div class="label">QC Performed</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0%</div>
+                <div class="label">External QA</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="otherSectionsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Recommendations</h2>
+        <ol>
+            <li><strong>Fix April Hematology Data:</strong> Investigate and correct the anomalous data entry</li>
+            <li><strong>Improve QC in Chemistry:</strong> Both Routine and Special Chemistry need to achieve >95% QC acceptance</li>
+            <li><strong>Implement QC for Molecular Pathology & Histopathology:</strong> These sections have no QC monitoring</li>
+            <li><strong>Address October Microbiology:</strong> Review the 0% QC acceptance in October</li>
+            <li><strong>Improve December Routine Chemistry:</strong> QC dropped to 82.3% - investigate root cause</li>
+            <li><strong>Complete External QA Documentation:</strong> Ensure all departments document their EQA activities</li>
+        </ol>
+    </div>
+
+    <script>
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        // Monthly Trend Chart
+        new Chart(document.getElementById('monthlyTrendChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Hematology', data: [8801, 8339, 6701, 8862, 9195, 8028, 9850, 10614, 12308, 12936, 11551, 10162], borderColor: '#e74c3c', tension: 0.3 },
+                    { label: 'Routine Chemistry', data: [7599, 7277, 5864, 9657, 8932, 8397, 10427, 10130, 10401, 12289, 10401, 8539], borderColor: '#3498db', tension: 0.3 },
+                    { label: 'Special Chemistry', data: [4645, 4616, 3653, 4488, 5996, 3690, 5052, 6562, 6050, 4645, 6050, 5498], borderColor: '#27ae60', tension: 0.3 },
+                    { label: 'Microbiology', data: [3512, 3183, 2558, 3055, 3191, 3493, 4558, 4558, 4183, 3928, 4183, 3480], borderColor: '#9b59b6', tension: 0.3 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Monthly Specimen Volume by Department' } } }
+        });
+
+        // Department Pie Chart
+        new Chart(document.getElementById('departmentPieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Hematology', 'Routine Chemistry', 'Special Chemistry', 'Microbiology', 'Molecular Pathology', 'Histopathology'],
+                datasets: [{ data: [111307, 106357, 60944, 42882, 620, 2009], backgroundColor: ['#e74c3c', '#3498db', '#27ae60', '#9b59b6', '#f39c12', '#1abc9c'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Specimen Distribution by Department' } } }
+        });
+
+        // Hematology Chart
+        new Chart(document.getElementById('hematologyChart'), {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Specimens', data: [8801, 8339, 6701, 8862, 9195, 8028, 9850, 10614, 12308, 12936, 11551, 10162], type: 'line', yAxisID: 'y', borderColor: '#3498db' },
+                    { label: 'QC Failed', data: [0, 0, 0, 190, 2, 0, 0, 0, 2, 0, 2, 6], type: 'bar', yAxisID: 'y1', backgroundColor: '#e74c3c' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Hematology: Specimens vs QC Failures' } }, scales: { y: { type: 'linear', position: 'left' }, y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false } } } }
+        });
+
+        // Routine Chemistry Chart
+        new Chart(document.getElementById('routineChemChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'QC Acceptance %', data: [92, 84, 95, 87, 87, 88.3, 92.5, 92.2, 89.1, 86, 89.1, 82.3], borderColor: '#e74c3c', tension: 0.3, fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Routine Chemistry QC Acceptance %' } }, scales: { y: { min: 70, max: 100 } } }
+        });
+
+        // Special Chemistry Chart
+        new Chart(document.getElementById('specialChemChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'QC Acceptance %', data: [89, 81, 93, 83, 85, 89.5, 95.5, 94.5, 96.3, 95, 96.3, 93.5], borderColor: '#27ae60', tension: 0.3, fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Special Chemistry QC Acceptance %' } }, scales: { y: { min: 70, max: 100 } } }
+        });
+
+        // Microbiology Chart
+        new Chart(document.getElementById('microbiologyChart'), {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Specimens', data: [3512, 3183, 2558, 3055, 3191, 3493, 4558, 4558, 4183, 3928, 4183, 3480], type: 'line', yAxisID: 'y', borderColor: '#3498db' },
+                    { label: 'QC Failed', data: [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0], type: 'bar', yAxisID: 'y1', backgroundColor: '#e74c3c' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Microbiology: Specimens vs QC Failures' } }, scales: { y: { type: 'linear', position: 'left' }, y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false } } } }
+        });
+
+        // Other Sections Chart
+        new Chart(document.getElementById('otherSectionsChart'), {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Molecular Pathology', data: [59, 54, 41, 60, 61, 44, 53, 50, 52, 50, 52, 44], backgroundColor: '#f39c12' },
+                    { label: 'Histopathology', data: [176, 142, 81, 164, 219, 145, 220, 188, 172, 169, 172, 161], backgroundColor: '#1abc9c' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Molecular Pathology & Histopathology Monthly Specimens' } } }
+        });
+    </script>
+</body>
+</html>

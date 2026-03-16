@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mansehra Diagnostic Center - QA Analysis 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        h1 { color: #2c3e50; text-align: center; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .chart-container { position: relative; height: 300px; margin: 20px 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .stat-box { background: #ecf0f1; padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-box .value { font-size: 24px; font-weight: bold; color: #2980b9; }
+        .stat-box .label { font-size: 12px; color: #7f8c8d; }
+        .warning { color: #e74c3c; font-weight: bold; }
+        .good { color: #27ae60; font-weight: bold; }
+        .alert { color: #f39c12; font-weight: bold; }
+        
+        /* Critical Alert Box Styles */
+        .critical-alert {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #c0392b;
+            animation: pulse 2s infinite;
+        }
+        .critical-alert h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .warning-alert {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #d35400;
+        }
+        .info-alert {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #1a5276;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+        }
+        
+        .alert-icon { font-size: 24px; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
+        th { background: #3498db; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .nav { position: sticky; top: 0; background: #2c3e50; padding: 10px; z-index: 100; }
+        .nav a { color: white; margin: 0 15px; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+        
+        .trend-down { color: #e74c3c; }
+        .trend-up { color: #27ae60; }
+        .indicator-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-danger { background: #e74c3c; color: white; }
+        .badge-warning { background: #f39c12; color: white; }
+        .badge-success { background: #27ae60; color: white; }
+        
+        .metrics-comparison {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .metric-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .metric-value { font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="#critical-alerts">🚨 Critical Alerts</a>
+        <a href="#overview">Overview</a>
+        <a href="#hematology">Hematology</a>
+        <a href="#chemistry">Chemistry</a>
+        <a href="#microbiology">Microbiology</a>
+        <a href="#other">Other Sections</a>
+    </div>
+
+    <h1>🏥 Mansehra Diagnostic Center<br>Annual QA Analysis - 2025</h1>
+
+    <!-- CRITICAL ALERTS SECTION -->
+    <div class="section" id="critical-alerts">
+        <div class="critical-alert">
+            <h3><span class="alert-icon">🚨</span> CRITICAL ALERTS - IMMEDIATE ACTION REQUIRED</h3>
+            <p>Multiple severe quality issues detected that pose immediate risks to patient safety and test accuracy.</p>
+        </div>
+        
+        <div class="critical-alert" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
+            <h4><span class="alert-icon">☠️</span> 1. MICROBIOLOGY - ZERO QC PERFORMED ALL YEAR!</h4>
+            <p><strong>Status:</strong> <span class="badge-danger">NO QUALITY CONTROL CONDUCTED IN 2025</span></p>
+            <p><strong>Risk:</strong> 12,249 patient results have NO internal quality verification</p>
+            <p><strong>Impact:</strong> Contaminated cultures, false negatives, or false positives go undetected!</p>
+            <p><strong>ACTION:</strong> <span class="badge-danger">IMPLEMENT QC IMMEDIATELY - THIS IS A PATIENT SAFETY ISSUE</span></p>
+        </div>
+        
+        <div class="warning-alert">
+            <h4><span class="alert-icon">⚠️</span> 2. ROUTINE CHEMISTRY - CONSISTENTLY LOW QC ACCEPTANCE</h4>
+            <p><strong>Status:</strong> QC Acceptance <span class="badge-danger">NEVER REACHED 95% TARGET</span></p>
+            <p><strong>Range:</strong> 87% - 91% (Target: >95%)</p>
+            <p><strong>Impact:</strong> 30,632 test results this year have higher than acceptable error rates</p>
+            <p><strong>ACTION:</strong> <span class="badge-danger">INVESTIGATE ROOT CAUSE - EQUIPMENT MAY BE FAULTY</span></p>
+        </div>
+        
+        <div class="warning-alert">
+            <h4><span class="alert-icon">⚠️</span> 3. DATA CORRUPTION - HEMATOLOGY APRIL</h4>
+            <p><strong>April QC:</strong> 62 failures out of 0 tests run (IMPOSSIBLE - DATA ERROR)</p>
+            <p><strong>April QC Acceptance:</strong> Shows 2% (likely wrong)</p>
+            <p><strong>Panic Results:</strong> Shows 96% - likely data entry mistake</p>
+            <p><strong>ACTION:</strong> <span class="badge-warning">AUDIT AND CORRECT APRIL DATA</span></p>
+        </div>
+        
+        <div class="warning-alert">
+            <h4><span class="alert-icon">⚠️</span> 4. SPECIMEN VOLUME SPIKE - SEPT/OCT 2025</h4>
+            <p><strong>September:</strong> 4,312 specimens (vs 2,111 in August - 104% increase!)</p>
+            <p><strong>October:</strong> 4,487 specimens (peak month)</p>
+            <p><strong>Risk:</strong> Staff overwhelmed, errors increase, quality compromised</p>
+            <p><strong>November:</strong> Dropped to 1,719 - what happened? Need investigation</p>
+            <p><strong>ACTION:</strong> <span class="badge-warning">PLAN STAFFING FOR HIGH-VOLUME PERIODS</span></p>
+        </div>
+        
+        <div class="info-alert">
+            <h4><span class="alert-icon">📊</span> 5. UPCOMING RISKS - PREDICTIVE ANALYSIS</h4>
+            <p>Based on current trends, the following are likely to worsen:</p>
+            <ul>
+                <li><strong>QC Failure Trend:</strong> Routine Chemistry stuck at 87-91% - will remain below target without intervention</li>
+                <li><strong>External QA:</strong> Stopped for most sections from July - quality not externally validated</li>
+                <li><strong>Equipment Failure:</strong> High failure rates suggest equipment calibration issues</li>
+                <li><strong>Staff Training:</strong> Volume spike handling suggests need for more trained personnel</li>
+                <li><strong>Downstream Impact:</strong> Low-quality results may lead to misdiagnosis</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" id="overview">
+        <h2>📊 Overall Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">66,344</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">18</div>
+                <div class="label">Total Rejected</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">0.027%</div>
+                <div class="label">Rejection Rate</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">91.2%</div>
+                <div class="label">Avg QC Acceptance ⬇️</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="monthlyTrendChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="departmentPieChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section" id="hematology">
+        <h2>🩸 Hematology</h2>
+        
+        <div class="warning-alert">
+            <h4><span class="alert-icon">⚠️</span> CRITICAL: Data Quality Issues + April Anomaly</h4>
+            <p>April shows corrupted data (62 failed QC with 0 run) - results unreliable</p>
+            <p>QC frequency dropped in April (0 tests) - major quality gap</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">18,619</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">18</div>
+                <div class="label">Rejected Samples</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">92.5%</div>
+                <div class="label">QC Acceptance</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">100%</div>
+                <div class="label">Panic Notification</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="hematologyChart"></canvas>
+        </div>
+        
+        <h3>⚠️ Issues Detected</h3>
+        <ul>
+            <li><span class="badge-danger">April:</span> 0 QC run but shows 62 failures - DATA CORRUPTION</li>
+            <li><span class="badge-warning">Sept-Oct:</span> Volume spike 4x normal - staffing concerns</li>
+            <li><span class="warning">QC acceptance:</span> Dropped to 2% in April (invalid data)</li>
+            <li><span class="warning">EQA:</span> Not performed from July onwards</li>
+        </table>
+        
+        <table>
+            <tr><th>Month</th><th>Specimens</th><th>QC Run</th><th>QC Failed</th><th>QC Accept%</th><th>Alert</th></tr>
+            <tr><td>Jan</td><td>742</td><td>21</td><td>1</td><td class="good">95%</td><td></td></tr>
+            <tr><td>Feb</td><td>749</td><td>35</td><td>1</td><td class="good">97%</td><td></td></tr>
+            <tr><td>Mar</td><td>665</td><td>64</td><td>4</td><td class="warning">93.7%</td><td></td></tr>
+            <tr><td>Apr</td><td>1,155</td><td class="warning">0</td><td class="warning">62</td><td class="badge-danger">2%</td><td class="badge-danger">DATA ERROR</td></tr>
+            <tr><td>May</td><td>1,254</td><td>56</td><td>4</td><td class="warning">92.9%</td><td></td></tr>
+            <tr><td>Jun</td><td>749</td><td>35</td><td>1</td><td class="good">97%</td><td></td></tr>
+            <tr><td>Jul</td><td>1,539</td><td>66</td><td>4</td><td class="good">94%</td><td></td></tr>
+<td>Aug</td><td>2,111            <tr></td><td>53</td><td>1</td><td class="good">98%</td><td class="badge-warning">High Vol</td></tr>
+            <tr><td>Sep</td><td class="warning">4,312</td><td>62</td><td>2</td><td class="good">96.7%</td><td class="badge-danger">SPIKE</td></tr>
+            <tr><td>Oct</td><td class="warning">4,487</td><td>64</td><td>2</td><td class="good">96.9%</td><td class="badge-danger">PEAK</td></tr>
+            <tr><td>Nov</td><td>1,719</td><td>62</td><td>2</td><td class="good">96.7%</td><td></td></tr>
+            <tr><td>Dec</td><td>989</td><td>64</td><td>2</td><td class="good">96.8%</td><td></td></tr>
+        </table>
+    </div>
+
+    <div class="section" id="chemistry">
+        <h2>🧪 Chemistry (Routine + Special)</h2>
+        
+        <div class="critical-alert">
+            <h4><span class="alert-icon">🚨</span> CRITICAL: ROUTINE CHEMISTRY NEVER MET 95% QC TARGET</h4>
+            <p>All 12 months below acceptable QC threshold!</p>
+        </div>
+        
+        <h3>Routine Chemistry - ⚠️ BELOW STANDARD</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">30,632</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">89%</div>
+                <div class="label">Avg QC Acceptance ❌</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">100%</div>
+                <div class="label">Panic Notification</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">Inconsistent</div>
+                <div class="label">EQA (Partial)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="routineChemChart"></canvas>
+        </div>
+        
+        <h3>Special Chemistry - Improving</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">4,442</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">95.8%</div>
+                <div class="label">QC Acceptance</div>
+            </div>
+            <div class="stat-box">
+                <div class="value good">100%</div>
+                <div class="label">Panic Notification</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">No</div>
+                <div class="label">EQA (Jul-Dec)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="specialChemChart"></canvas>
+        </div>
+        
+        <h3>⚠️ Issues - Routine Chemistry</h3>
+        <ul>
+            <li><span class="badge-danger">CRITICAL:</span> ALL 12 months below 95% QC target</li>
+            <li>Highest QC failure: January (14 failures, 87% acceptance)</li>
+            <li>Equipment calibration likely needs attention</li>
+            <li>EQA stopped from March to June, then resumed</li>
+        </ul>
+    </div>
+
+    <div class="section" id="microbiology">
+        <h2>🦠 Microbiology - 🚨 NO QC PERFORMED</h2>
+        
+        <div class="critical-alert">
+            <h4><span class="alert-icon">☠️</span> CRITICAL: ZERO QUALITY CONTROL ALL YEAR</h4>
+            <p>No internal QC was conducted in any month of 2025!</p>
+            <p>All 12,249 specimens processed without quality verification</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">12,249</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0%</div>
+                <div class="label">QC Performed ❌</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">5</div>
+                <div class="label">Rejected Samples</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">N/A</div>
+                <div class="label">EQA (None)</div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="microbiologyChart"></canvas>
+        </div>
+        
+        <div class="warning-alert">
+            <h4><span class="alert-icon">⚠️</span> Risks</h4>
+            <ul>
+                <li>No way to detect contaminated cultures</li>
+                <li>False positives/negatives go undetected</li>
+                <li>Antibiotic sensitivity results may be unreliable</li>
+                <li>Patient treatment may be compromised</li>
+                <li>No External QA performed</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" id="other">
+        <h2>🔬 Molecular Biology & Histopathology</h2>
+        
+        <div class="info-alert">
+            <h4><span class="alert-icon">ℹ️</span> Both sections are OUTSOURCED</h4>
+            <p>Tests are sent to external labs - limited internal QA data available</p>
+        </div>
+        
+        <h3>Molecular Biology</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">341</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">Outsourced</div>
+                <div class="label">Service Type</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0</div>
+                <div class="label">QC Run</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">No</div>
+                <div class="label">EQA</div>
+            </div>
+        </div>
+        
+        <h3>Histopathology</h3>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="value">70</div>
+                <div class="label">Total Specimens</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">Outsourced</div>
+                <div class="label">Service Type</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">0</div>
+                <div class="label">QC Run</div>
+            </div>
+            <div class="stat-box">
+                <div class="value warning">No</div>
+                <div class="label">EQA</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="otherSectionsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Recommendations - PRIORITY ORDER</h2>
+        
+        <div class="critical-alert">
+            <h3>🚨 IMMEDIATE ACTIONS (This Week)</h3>
+            <ol>
+                <li><strong>Start Microbiology QC immediately</strong> - This is a patient safety crisis</li>
+                <li><strong>Fix Hematology April data</strong> - Correct or invalidate the corrupted records</li>
+                <li><strong>Investigate Routine Chemistry equipment</strong> - Why consistently below 95%?</li>
+            </ol>
+        </div>
+        
+        <div class="warning-alert">
+            <h4>⚠️ HIGH PRIORITY (This Month)</h4>
+            <ol>
+                <li>Implement automated QC scheduling for all departments</li>
+                <li>Resume External QA for all sections</li>
+                <li>Develop surge capacity plan for high-volume periods</li>
+                <li>Consider equipment calibration/upgrade for Routine Chemistry</li>
+            </ol>
+        </div>
+        
+        <div class="info-alert">
+            <h4>📊 MONITORING (Ongoing)</h4>
+            <ol>
+                <li>Track QC acceptance monthly - set 95% minimum threshold</li>
+                <li>Review outsourcing vendor quality metrics</li>
+                <li>Staff training on quality protocols</li>
+                <li>Regular data integrity audits</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        // Monthly Trend Chart
+        new Chart(document.getElementById('monthlyTrendChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Hematology', data: [742, 749, 665, 1155, 1254, 749, 1539, 2111, 4312, 4487, 1719, 989], borderColor: '#e74c3c', tension: 0.3, fill: false },
+                    { label: 'Routine Chemistry', data: [1796, 2045, 1480, 2738, 2684, 2330, 3210, 3150, 2988, 2726, 2274, 2207], borderColor: '#3498db', tension: 0.3, fill: false },
+                    { label: 'Special Chemistry', data: [268, 342, 272, 423, 482, 342, 514, 505, 400, 372, 344, 448], borderColor: '#27ae60', tension: 0.3, fill: false },
+                    { label: 'Microbiology', data: [819, 863, 627, 1095, 1061, 1014, 1336, 1289, 1281, 1177, 757, 930], borderColor: '#9b59b6', tension: 0.3, fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Monthly Specimen Volume by Department - Note Sept/Oct Spike' } } }
+        });
+
+        // Department Pie Chart
+        new Chart(document.getElementById('departmentPieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Hematology', 'Routine Chemistry', 'Special Chemistry', 'Microbiology', 'Molecular Biology', 'Histopathology'],
+                datasets: [{ data: [18619, 30632, 4442, 12249, 341, 70], backgroundColor: ['#e74c3c', '#3498db', '#27ae60', '#9b59b6', '#f39c12', '#1abc9c'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Specimen Distribution by Department' } } }
+        });
+
+        // Hematology Chart
+        new Chart(document.getElementById('hematologyChart'), {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Specimens', data: [742, 749, 665, 1155, 1254, 749, 1539, 2111, 4312, 4487, 1719, 989], type: 'bar', backgroundColor: '#3498db' },
+                    { label: 'QC Acceptance %', data: [95, 97, 93.7, 2, 92.9, 97, 94, 98, 96.7, 96.9, 96.7, 96.8], type: 'line', yAxisID: 'y1', borderColor: '#e74c3c', tension: 0.3 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Hematology: Volume vs QC Acceptance - Note April Drop' } }, scales: { y: { title: { display: true, text: 'Specimens' } }, y1: { position: 'right', min: 0, max: 100, title: { display: true, text: 'QC %' } } } }
+        });
+
+        // Routine Chemistry Chart
+        new Chart(document.getElementById('routineChemChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'QC Acceptance %', data: [87, 89, 87.3, 87, 88.5, 88.2, 89, 91, 91, 89, 90, 89], borderColor: '#e74c3c', tension: 0.3, fill: false },
+                    { label: 'Target Line', data: [95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95], borderColor: '#27ae60', borderDash: [5, 5], fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Routine Chemistry QC - NEVER MET 95% TARGET!' } }, scales: { y: { min: 80, max: 100 } } }
+        });
+
+        // Special Chemistry Chart
+        new Chart(document.getElementById('specialChemChart'), {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'QC Acceptance %', data: [95, 91, 91, 93.3, 92.8, 91, 92, 92, 100, 100, 100, 100], borderColor: '#27ae60', tension: 0.3, fill: false },
+                    { label: 'Target Line', data: [95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95], borderColor: '#27ae60', borderDash: [5, 5], fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Special Chemistry QC - Improved in Last Quarter' } }, scales: { y: { min: 85, max: 105 } } }
+        });
+
+        // Microbiology Chart
+        new Chart(document.getElementById('microbiologyChart'), {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Specimens', data: [819, 863, 627, 1095, 1061, 1014, 1336, 1289, 1281, 1177, 757, 930], type: 'bar', backgroundColor: '#3498db' },
+                    { label: 'QC Run', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], type: 'line', yAxisID: 'y1', borderColor: '#e74c3c', pointRadius: 8 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'MICROBIOLOGY: ZERO QC ALL YEAR!' } }, scales: { y: { title: { display: true, text: 'Specimens' } }, y1: { position: 'right', min: 0, max: 10, title: { display: true, text: 'QC Tests' } } } }
+        });
+
+        // Other Sections Chart
+        new Chart(document.getElementById('otherSectionsChart'), {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Molecular Biology', data: [22, 29, 0, 39, 2, 26, 50, 45, 26, 38, 32, 32], backgroundColor: '#f39c12' },
+                    { label: 'Histopathology', data: [1, 1, 19, 1, 38, 2, 1, 0, 3, 1, 1, 70], backgroundColor: '#1abc9c' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Molecular Biology & Histopathology (Outsourced)' } } }
+        });
+    </script>
+</body>
+</html>

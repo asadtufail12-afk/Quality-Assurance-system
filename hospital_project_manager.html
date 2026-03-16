@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alkhidmat Jamal Hospital Mian Channu - Project Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        
+        .app-container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .header { background: white; padding: 20px 30px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { color: #333; font-size: 24px; }
+        .header .date { color: #666; font-size: 14px; }
+        
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        .stat-card .icon { font-size: 32px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 28px; font-weight: bold; color: #333; }
+        .stat-card .label { color: #666; font-size: 13px; }
+        .stat-card.warning { border-left: 4px solid #f39c12; }
+        .stat-card.danger { border-left: 4px solid #e74c3c; }
+        .stat-card.success { border-left: 4px solid #27ae60; }
+        
+        /* Notification Banner */
+        .notification-banner { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; display: none; animation: pulse 2s infinite; }
+        .notification-banner.show { display: block; }
+        .notification-banner h3 { margin-bottom: 10px; }
+        .notification-banner ul { list-style: none; }
+        .notification-banner li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: space-between; }
+        
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); } 50% { box-shadow: 0 0 0 10px rgba(231,76,60,0); } }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { background: rgba(255,255,255,0.3); color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .tab.active { background: white; color: #667eea; font-weight: bold; }
+        .tab:hover { background: rgba(255,255,255,0.5); }
+        
+        /* Content Sections */
+        .content-section { display: none; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .content-section.active { display: block; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        
+        /* Buttons */
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #333; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-progress { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-overdue { background: #f8d7da; color: #721c24; }
+        
+        .priority-high { color: #e74c3c; font-weight: bold; }
+        .priority-medium { color: #f39c12; }
+        .priority-low { color: #27ae60; }
+        
+        /* Timeline */
+        .timeline { position: relative; padding-left: 30px; }
+        .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #ddd; }
+        .timeline-item { position: relative; padding-bottom: 20px; }
+        .timeline-item::before { content: ''; position: absolute; left: -24px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #667eea; }
+        .timeline-item.completed::before { background: #27ae60; }
+        .timeline-item.overdue::before { background: #e74c3c; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { color: #333; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+        
+        /* Charts */
+        .chart-container { height: 250px; margin: 20px 0; }
+        
+        /* Search */
+        .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-box input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        
+        /* Action buttons in table */
+        .action-btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+        .action-edit { background: #3498db; color: white; }
+        .action-delete { background: #e74c3c; color: white; }
+        
+        /* Reminder badge */
+        .reminder-badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>🏥 Alkhidmat Jamal Hospital Mian Channu<br>Equipment Installation & Staffing Project</h1>
+                <p class="date">Project Duration: 3 Months | Start: <span id="projectStart"></span></p>
+            </div>
+            <div style="text-align: right;">
+                <button class="btn btn-primary" onclick="openModal('addTaskModal')">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon" style="color: #667eea;">📋</div>
+                <div class="value" id="totalTasks">0</div>
+                <div class="label">Total Tasks</div>
+            </div>
+            <div class="stat-card success">
+                <div class="icon" style="color: #27ae60;">✓</div>
+                <div class="value" id="completedTasks">0</div>
+                <div class="label">Completed</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="icon" style="color: #f39c12;">⏳</div>
+                <div class="value" id="pendingTasks">0</div>
+                <div class="label">In Progress</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="icon" style="color: #e74c3c;">⚠️</div>
+                <div class="value" id="overdueTasks">0</div>
+                <div class="label">Overdue</div>
+            </div>
+        </div>
+        
+        <!-- Notification Banner -->
+        <div class="notification-banner" id="notificationBanner">
+            <h3>🚨 OVERDUE & DUE TODAY - IMMEDIATE ACTION REQUIRED</h3>
+            <ul id="notificationList"></ul>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('equipment')">🔧 Equipment</button>
+            <button class="tab" onclick="showTab('supplies')">📦 Supplies</button>
+            <button class="tab" onclick="showTab('staff')">👥 Staff Hiring</button>
+            <button class="tab" onclick="showTab('timeline')">📅 Timeline</button>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div class="content-section active" id="dashboard">
+            <h2 style="margin-bottom: 20px;">Project Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon">🔧</div>
+                    <div class="value" id="totalEquipment">0</div>
+                    <div class="label">Equipment Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">✅</div>
+                    <div class="value" id="installedEquipment">0</div>
+                    <div class="label">Installed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">👤</div>
+                    <div class="value" id="totalStaff">0</div>
+                    <div class="label">Staff Positions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">✅</div>
+                    <div class="value" id="hiredStaff">0</div>
+                    <div class="label">Hired</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="chart-container">
+                    <canvas id="equipmentChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="staffChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Equipment Tab -->
+        <div class="content-section" id="equipment">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Equipment Management</h2>
+                <button class="btn btn-primary" onclick="openModal('addEquipmentModal')">
+                    <i class="fas fa-plus"></i> Add Equipment
+                </button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="equipmentSearch" placeholder="Search equipment..." onkeyup="filterTable('equipmentTable', 1)">
+                <select id="equipmentFilter" onchange="filterEquipment()">
+                    <option value="all">All Status</option>
+                    <option value="existing">Existing</option>
+                    <option value="pending">To Install</option>
+                    <option value="installed">Installed</option>
+                </select>
+            </div>
+            <table id="equipmentTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Equipment Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Deadline</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="equipmentTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Supplies Tab -->
+        <div class="content-section" id="supplies">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Supplies Management</h2>
+                <button class="btn btn-primary" onclick="openModal('addSupplyModal')">
+                    <i class="fas fa-plus"></i> Add Supply
+                </button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="supplySearch" placeholder="Search supplies..." onkeyup="filterTable('supplyTable', 1)">
+                <select id="supplyFilter" onchange="renderSupplyTable()">
+                    <option value="all">All Categories</option>
+                    <option value="Lab Consumables">Lab Consumables</option>
+                    <option value="Pharmacy Medicine">Pharmacy Medicine</option>
+                    <option value="Stationary">Stationary</option>
+                    <option value="Letter heads">Letter heads</option>
+                </select>
+            </div>
+            <table id="supplyTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Deadline</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="supplyTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Staff Tab -->
+        <div class="content-section" id="staff">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Staff Hiring</h2>
+                <button class="btn btn-primary" onclick="openModal('addStaffModal')">
+                    <i class="fas fa-plus"></i> Add Position
+                </button>
+            </div>
+            <table id="staffTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Deadline</th>
+                        <th>Priority</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Timeline Tab -->
+        <div class="content-section" id="timeline">
+            <h2>Project Timeline</h2>
+            <div class="timeline" id="timelineContainer"></div>
+        </div>
+    </div>
+    
+    <!-- Add Task Modal -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Task</h2>
+                <button class="modal-close" onclick="closeModal('addTaskModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Task Type</label>
+                <select id="taskType" onchange="showTaskFields()">
+                    <option value="">Select Type</option>
+                    <option value="equipment">Equipment Installation</option>
+                    <option value="staff">Staff Hiring</option>
+                    <option value="general">General Task</option>
+                </select>
+            </div>
+            <div id="equipmentFields" style="display: none;">
+                <div class="form-group">
+                    <label>Equipment Name</label>
+                    <input type="text" id="equipName" placeholder="e.g., MRI Machine">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="equipCategory">
+                        <option>Diagnostic</option>
+                        <option>Imaging</option>
+                        <option>Laboratory</option>
+                        <option>Surgical</option>
+                        <option>Patient Care</option>
+                    </select>
+                </div>
+            </div>
+            <div id="staffFields" style="display: none;">
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" id="staffPosition" placeholder="e.g., Lab Technician">
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <select id="staffDept">
+                        <option>Laboratory</option>
+                        <option>Radiology</option>
+                        <option>Pharmacy</option>
+                        <option>Nursing</option>
+                        <option>Administration</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" id="taskDeadline">
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="taskPriority">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="addTask()">Add Task</button>
+        </div>
+    </div>
+    
+    <!-- Quick Add Equipment Modal -->
+    <div class="modal" id="addEquipmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Equipment</h2>
+                <button class="modal-close" onclick="closeModal('addEquipmentModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Equipment Name</label>
+                <input type="text" id="newEquipName">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="newEquipCategory">
+                    <option>Diagnostic</option>
+                    <option>Imaging</option>
+                    <option>Laboratory</option>
+                    <option>Surgical</option>
+                    <option>Patient Care</option>
+                    <option>Pharmacy</option>
+                    <option>General</option>
+                    <option>OPD</option>
+                    <option>Indoor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="newEquipQuantity" value="1" min="1">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="newEquipStatus">
+                    <option value="existing">Existing</option>
+                    <option value="pending">To Install</option>
+                    <option value="installed">Installed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" id="newEquipLocation" placeholder="e.g., Room 101">
+            </div>
+            <div class="form-group">
+                <label>Installation Deadline</label>
+                <input type="date" id="newEquipDeadline">
+            </div>
+            <button class="btn btn-primary" onclick="addEquipment()">Add Equipment</button>
+        </div>
+    </div>
+    
+    <!-- Edit Equipment Modal -->
+    <div class="modal" id="editEquipmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Equipment</h2>
+                <button class="modal-close" onclick="closeModal('editEquipmentModal')">&times;</button>
+            </div>
+            <input type="hidden" id="editEquipId">
+            <div class="form-group">
+                <label>Equipment Name</label>
+                <input type="text" id="editEquipName">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="editEquipCategory">
+                    <option>Diagnostic</option>
+                    <option>Imaging</option>
+                    <option>Laboratory</option>
+                    <option>Surgical</option>
+                    <option>Patient Care</option>
+                    <option>Pharmacy</option>
+                    <option>General</option>
+                    <option>OPD</option>
+                    <option>Indoor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="editEquipQuantity" min="1">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="editEquipStatus">
+                    <option value="existing">Existing</option>
+                    <option value="pending">To Install</option>
+                    <option value="installed">Installed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" id="editEquipLocation">
+            </div>
+            <div class="form-group">
+                <label>Installation Deadline</label>
+                <input type="date" id="editEquipDeadline">
+            </div>
+            <button class="btn btn-primary" onclick="saveEquipmentEdit()">Save Changes</button>
+        </div>
+    </div>
+    
+    <!-- Add Supply Modal -->
+    <div class="modal" id="addSupplyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Supply Item</h2>
+                <button class="modal-close" onclick="closeModal('addSupplyModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="newSupplyName" placeholder="e.g., Test Tubes, Paracetamol, A4 Paper">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="newSupplyCategory">
+                    <option>Lab Consumables</option>
+                    <option>Pharmacy Medicine</option>
+                    <option>Stationary</option>
+                    <option>Letter heads</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="newSupplyQuantity" value="1" min="1">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="newSupplyStatus">
+                    <option value="pending">To Procure</option>
+                    <option value="procured">Procured</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Required By</label>
+                <input type="date" id="newSupplyDeadline">
+            </div>
+            <button class="btn btn-primary" onclick="addSupply()">Add Supply</button>
+        </div>
+    </div>
+    
+    <!-- Edit Supply Modal -->
+    <div class="modal" id="editSupplyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Supply Item</h2>
+                <button class="modal-close" onclick="closeModal('editSupplyModal')">&times;</button>
+            </div>
+            <input type="hidden" id="editSupplyId">
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="editSupplyName">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="editSupplyCategory">
+                    <option>Lab Consumables</option>
+                    <option>Pharmacy Medicine</option>
+                    <option>Stationary</option>
+                    <option>Letter heads</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="editSupplyQuantity" min="1">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="editSupplyStatus">
+                    <option value="pending">To Procure</option>
+                    <option value="procured">Procured</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Required By</label>
+                <input type="date" id="editSupplyDeadline">
+            </div>
+            <button class="btn btn-primary" onclick="saveSupplyEdit()">Save Changes</button>
+        </div>
+    </div>
+    
+    <!-- Quick Add Staff Modal -->
+    <div class="modal" id="addStaffModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Staff Position</h2>
+                <button class="modal-close" onclick="closeModal('addStaffModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Position Title</label>
+                <input type="text" id="newStaffPosition">
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select id="newStaffDept">
+                    <option>Laboratory</option>
+                    <option>Radiology</option>
+                    <option>Pharmacy</option>
+                    <option>Nursing</option>
+                    <option>Administration</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="newStaffStatus">
+                    <option value="pending">To Hire</option>
+                    <option value="hired">Hired</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Hiring Deadline</label>
+                <input type="date" id="newStaffDeadline">
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="newStaffPriority">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="addStaff()">Add Position</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let equipment = JSON.parse(localStorage.getItem('equipment')) || [];
+        let supplies = JSON.parse(localStorage.getItem('supplies')) || [];
+        let staff = JSON.parse(localStorage.getItem('staff')) || [];
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        
+        // Set project start date
+        document.getElementById('projectStart').textContent = 'April 1, 2026';
+        
+        // Check notification every minute
+        setInterval(checkNotifications, 60000);
+        checkNotifications();
+        
+        function saveData() {
+            localStorage.setItem('equipment', JSON.stringify(equipment));
+            localStorage.setItem('supplies', JSON.stringify(supplies));
+            localStorage.setItem('staff', JSON.stringify(staff));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateDashboard();
+        }
+        
+        function updateDashboard() {
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('completedTasks').textContent = tasks.filter(t => t.status === 'completed').length;
+            document.getElementById('pendingTasks').textContent = tasks.filter(t => t.status === 'progress').length;
+            document.getElementById('overdueTasks').textContent = tasks.filter(t => t.status === 'overdue').length;
+            
+            document.getElementById('totalEquipment').textContent = equipment.length;
+            document.getElementById('installedEquipment').textContent = equipment.filter(e => e.status === 'installed').length;
+            document.getElementById('totalStaff').textContent = staff.length;
+            document.getElementById('hiredStaff').textContent = staff.filter(s => s.status === 'hired').length;
+            
+            renderEquipmentTable();
+            renderSupplyTable();
+            renderStaffTable();
+            renderTimeline();
+            updateCharts();
+        }
+        
+        function checkNotifications() {
+            const today = new Date();
+            const notifications = [];
+            
+            tasks.forEach(task => {
+                const deadline = new Date(task.deadline);
+                const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0 && task.status !== 'completed') {
+                    notifications.push({ title: task.name, days: diffDays, type: 'overdue' });
+                } else if (diffDays === 0 && task.status !== 'completed') {
+                    notifications.push({ title: task.name, days: 0, type: 'today' });
+                } else if (diffDays > 0 && diffDays <= 3 && task.status !== 'completed') {
+                    notifications.push({ title: task.name, days: diffDays, type: 'upcoming' });
+                }
+            });
+            
+            supplies.forEach(supply => {
+                const deadline = new Date(supply.deadline);
+                const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0 && supply.status !== 'delivered') {
+                    notifications.push({ title: '[SUPPLY] ' + supply.name, days: diffDays, type: 'overdue' });
+                } else if (diffDays === 0 && supply.status !== 'delivered') {
+                    notifications.push({ title: '[SUPPLY] ' + supply.name, days: 0, type: 'today' });
+                } else if (diffDays > 0 && diffDays <= 3 && supply.status !== 'delivered') {
+                    notifications.push({ title: '[SUPPLY] ' + supply.name, days: diffDays, type: 'upcoming' });
+                }
+            });
+            
+            const banner = document.getElementById('notificationBanner');
+            const list = document.getElementById('notificationList');
+            
+            if (notifications.length > 0) {
+                banner.classList.add('show');
+                list.innerHTML = notifications.map(n => `
+                    <li>
+                        <span>${n.title}</span>
+                        <span class="reminder-badge">${n.type === 'overdue' ? Math.abs(n.days) + ' days overdue' : n.type === 'today' ? 'DUE TODAY!' : n.days + ' days left'}</span>
+                    </li>
+                `).join('');
+            } else {
+                banner.classList.remove('show');
+            }
+        }
+        
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        function showTaskFields() {
+            const type = document.getElementById('taskType').value;
+            document.getElementById('equipmentFields').style.display = type === 'equipment' ? 'block' : 'none';
+            document.getElementById('staffFields').style.display = type === 'staff' ? 'block' : 'none';
+        }
+        
+        function addTask() {
+            const type = document.getElementById('taskType').value;
+            const deadline = document.getElementById('taskDeadline').value;
+            const priority = document.getElementById('taskPriority').value;
+            
+            let name = '';
+            if (type === 'equipment') {
+                name = document.getElementById('equipName').value;
+                equipment.push({
+                    id: Date.now(),
+                    name: name,
+                    category: document.getElementById('equipCategory').value,
+                    status: 'pending',
+                    location: '',
+                    deadline: deadline
+                });
+            } else if (type === 'staff') {
+                name = document.getElementById('staffPosition').value;
+                staff.push({
+                    id: Date.now(),
+                    position: name,
+                    department: document.getElementById('staffDept').value,
+                    status: 'pending',
+                    deadline: deadline,
+                    priority: priority
+                });
+            } else {
+                name = 'General Task';
+            }
+            
+            tasks.push({
+                id: Date.now(),
+                name: name,
+                type: type,
+                deadline: deadline,
+                priority: priority,
+                status: 'progress'
+            });
+            
+            saveData();
+            closeModal('addTaskModal');
+            alert('Task added successfully! Deadline reminders will be sent.');
+        }
+        
+        function addEquipment() {
+            equipment.push({
+                id: Date.now(),
+                name: document.getElementById('newEquipName').value,
+                category: document.getElementById('newEquipCategory').value,
+                quantity: document.getElementById('newEquipQuantity').value,
+                status: document.getElementById('newEquipStatus').value,
+                location: document.getElementById('newEquipLocation').value,
+                deadline: document.getElementById('newEquipDeadline').value
+            });
+            saveData();
+            closeModal('addEquipmentModal');
+        }
+        
+        function addSupply() {
+            supplies.push({
+                id: Date.now(),
+                name: document.getElementById('newSupplyName').value,
+                category: document.getElementById('newSupplyCategory').value,
+                quantity: document.getElementById('newSupplyQuantity').value,
+                status: document.getElementById('newSupplyStatus').value,
+                deadline: document.getElementById('newSupplyDeadline').value
+            });
+            saveData();
+            closeModal('addSupplyModal');
+        }
+        
+        function addStaff() {
+            staff.push({
+                id: Date.now(),
+                position: document.getElementById('newStaffPosition').value,
+                department: document.getElementById('newStaffDept').value,
+                status: document.getElementById('newStaffStatus').value,
+                deadline: document.getElementById('newStaffDeadline').value,
+                priority: document.getElementById('newStaffPriority').value
+            });
+            saveData();
+            closeModal('addStaffModal');
+        }
+        
+        function renderEquipmentTable() {
+            const tbody = document.getElementById('equipmentTableBody');
+            const filter = document.getElementById('equipmentFilter').value;
+            
+            const filtered = equipment.filter(e => filter === 'all' || e.status === filter);
+            
+            tbody.innerHTML = filtered.map(e => {
+                const deadline = new Date(e.deadline);
+                const today = new Date();
+                const isOverdue = deadline < today && e.status !== 'installed';
+                
+                return `
+                <tr>
+                    <td>${e.id}</td>
+                    <td>${e.name}</td>
+                    <td>${e.category}</td>
+                    <td>${e.quantity || 1}</td>
+                    <td><span class="status-badge status-${e.status === 'installed' ? 'completed' : e.status === 'existing' ? 'progress' : 'pending'}">${e.status}</span></td>
+                    <td>${e.location || '-'}</td>
+                    <td class="${isOverdue ? 'priority-high' : ''}">${e.deadline || '-'} ${isOverdue ? '<span class="reminder-badge">OVERDUE</span>' : ''}</td>
+                    <td>
+                        <button class="action-btn action-edit" onclick="openEditEquipmentModal(${e.id})">Edit</button>
+                        <button class="action-btn action-delete" onclick="deleteEquipment(${e.id})">Delete</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+        
+        function renderSupplyTable() {
+            const tbody = document.getElementById('supplyTableBody');
+            const filter = document.getElementById('supplyFilter').value;
+            
+            const filtered = supplies.filter(s => filter === 'all' || s.category === filter);
+            
+            tbody.innerHTML = filtered.map(s => {
+                const deadline = new Date(s.deadline);
+                const today = new Date();
+                const isOverdue = deadline < today && s.status !== 'delivered';
+                
+                return `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.category}</td>
+                    <td>${s.quantity || 1}</td>
+                    <td><span class="status-badge status-${s.status === 'delivered' ? 'completed' : s.status === 'procured' ? 'progress' : 'pending'}">${s.status}</span></td>
+                    <td class="${isOverdue ? 'priority-high' : ''}">${s.deadline || '-'} ${isOverdue ? '<span class="reminder-badge">OVERDUE</span>' : ''}</td>
+                    <td>
+                        <button class="action-btn action-edit" onclick="openEditSupplyModal(${s.id})">Edit</button>
+                        <button class="action-btn action-delete" onclick="deleteSupply(${s.id})">Delete</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+        
+        function deleteSupply(id) {
+            supplies = supplies.filter(s => s.id !== id);
+            saveData();
+        }
+        
+        function openEditSupplyModal(id) {
+            const item = supplies.find(s => s.id === id);
+            if (item) {
+                document.getElementById('editSupplyId').value = item.id;
+                document.getElementById('editSupplyName').value = item.name;
+                document.getElementById('editSupplyCategory').value = item.category;
+                document.getElementById('editSupplyQuantity').value = item.quantity || 1;
+                document.getElementById('editSupplyStatus').value = item.status;
+                document.getElementById('editSupplyDeadline').value = item.deadline || '';
+                openModal('editSupplyModal');
+            }
+        }
+        
+        function saveSupplyEdit() {
+            const id = parseInt(document.getElementById('editSupplyId').value);
+            const item = supplies.find(s => s.id === id);
+            if (item) {
+                item.name = document.getElementById('editSupplyName').value;
+                item.category = document.getElementById('editSupplyCategory').value;
+                item.quantity = document.getElementById('editSupplyQuantity').value;
+                item.status = document.getElementById('editSupplyStatus').value;
+                item.deadline = document.getElementById('editSupplyDeadline').value;
+                saveData();
+                closeModal('editSupplyModal');
+            }
+        }
+        
+        function renderStaffTable() {
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = staff.map(s => {
+                const deadline = new Date(s.deadline);
+                const today = new Date();
+                const isOverdue = deadline < today && s.status !== 'hired';
+                
+                return `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${s.position}</td>
+                    <td>${s.department}</td>
+                    <td><span class="status-badge status-${s.status === 'hired' ? 'completed' : 'pending'}">${s.status}</span></td>
+                    <td class="${isOverdue ? 'priority-high' : ''}">${s.deadline || '-'} ${isOverdue ? '<span class="reminder-badge">OVERDUE</span>' : ''}</td>
+                    <td class="priority-${s.priority}">${s.priority}</td>
+                    <td>
+                        <button class="action-btn action-edit" onclick="editStaff(${s.id})">Edit</button>
+                        <button class="action-btn action-delete" onclick="deleteStaff(${s.id})">Delete</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+        
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const allItems = [
+                ...equipment.map(e => ({...e, type: 'equipment'})), 
+                ...supplies.map(s => ({...s, type: 'supply', name: s.name, deadline: s.deadline, status: s.status})),
+                ...staff.map(s => ({...s, type: 'staff'}))
+            ];
+            allItems.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+            
+            container.innerHTML = allItems.map(item => {
+                const deadline = new Date(item.deadline);
+                const today = new Date();
+                const isOverdue = deadline < today && item.status !== 'completed' && item.status !== 'installed' && item.status !== 'hired' && item.status !== 'delivered';
+                const isCompleted = item.status === 'completed' || item.status === 'installed' || item.status === 'hired' || item.status === 'delivered';
+                
+                return `
+                <div class="timeline-item ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
+                    <strong>${item.name || item.position}</strong>
+                    <p>${item.type === 'equipment' ? item.category : item.type === 'supply' ? item.category : item.department}</p>
+                    <p>Deadline: ${item.deadline} ${isOverdue ? '<span class="reminder-badge">OVERDUE</span>' : ''}</p>
+                    <span class="status-badge status-${isCompleted ? 'completed' : isOverdue ? 'overdue' : 'progress'}">${isCompleted ? 'Done' : isOverdue ? 'Overdue' : 'Pending'}</span>
+                </div>
+            `}).join('');
+        }
+        
+        function editEquipment(id) {
+            // Kept for compatibility - now redirects to modal
+        }
+        
+        function openEditEquipmentModal(id) {
+            const item = equipment.find(e => e.id === id);
+            if (item) {
+                document.getElementById('editEquipId').value = item.id;
+                document.getElementById('editEquipName').value = item.name;
+                document.getElementById('editEquipCategory').value = item.category;
+                document.getElementById('editEquipQuantity').value = item.quantity || 1;
+                document.getElementById('editEquipStatus').value = item.status;
+                document.getElementById('editEquipLocation').value = item.location || '';
+                document.getElementById('editEquipDeadline').value = item.deadline || '';
+                openModal('editEquipmentModal');
+            }
+        }
+        
+        function saveEquipmentEdit() {
+            const id = parseInt(document.getElementById('editEquipId').value);
+            const item = equipment.find(e => e.id === id);
+            if (item) {
+                item.name = document.getElementById('editEquipName').value;
+                item.category = document.getElementById('editEquipCategory').value;
+                item.quantity = document.getElementById('editEquipQuantity').value;
+                item.status = document.getElementById('editEquipStatus').value;
+                item.location = document.getElementById('editEquipLocation').value;
+                item.deadline = document.getElementById('editEquipDeadline').value;
+                saveData();
+                closeModal('editEquipmentModal');
+            }
+        }
+        
+        function deleteEquipment(id) {
+            equipment = equipment.filter(e => e.id !== id);
+            saveData();
+        }
+        
+        function editStaff(id) {
+            const item = staff.find(s => s.id === id);
+            if(item) {
+                item.status = item.status === 'pending' ? 'hired' : item.status;
+                saveData();
+            }
+        }
+        
+        function deleteStaff(id) {
+            staff = staff.filter(s => s.id !== id);
+            saveData();
+        }
+        
+        function filterTable(tableId, colIndex) {
+            const input = document.getElementById(tableId === 'equipmentTable' ? 'equipmentSearch' : 'staffSearch');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td')[colIndex];
+                if (td) {
+                    tr[i].style.display = td.textContent.toUpperCase().indexOf(filter) > -1 ? '' : 'none';
+                }
+            }
+        }
+        
+        function filterEquipment() {
+            renderEquipmentTable();
+        }
+        
+        let equipmentChart, staffChart;
+        
+        function updateCharts() {
+            const equipCtx = document.getElementById('equipmentChart').getContext('2d');
+            const staffCtx = document.getElementById('staffChart').getContext('2d');
+            
+            const equipStatus = {
+                existing: equipment.filter(e => e.status === 'existing').length,
+                pending: equipment.filter(e => e.status === 'pending').length,
+                installed: equipment.filter(e => e.status === 'installed').length
+            };
+            
+            const staffStatus = {
+                pending: staff.filter(s => s.status === 'pending').length,
+                hired: staff.filter(s => s.status === 'hired').length
+            };
+            
+            if (equipmentChart) equipmentChart.destroy();
+            if (staffChart) staffChart.destroy();
+            
+            equipmentChart = new Chart(equipCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Existing', 'To Install', 'Installed'],
+                    datasets: [{ data: [equipStatus.existing, equipStatus.pending, equipStatus.installed], backgroundColor: ['#3498db', '#f39c12', '#27ae60'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Equipment Status' } } }
+            });
+            
+            staffChart = new Chart(staffCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['To Hire', 'Hired'],
+                    datasets: [{ data: [staffStatus.pending, staffStatus.hired], backgroundColor: ['#e74c3c', '#27ae60'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Staff Hiring Status' } } }
+            });
+        }
+        
+        // Initialize empty data (user will add their own)
+        if (equipment.length === 0 && staff.length === 0) {
+            // Start with empty data - no sample data
+            saveData();
+        }
+        
+        updateDashboard();
+    </script>
+</body>
+</html>

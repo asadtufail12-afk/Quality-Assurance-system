@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GB Healthcare Project - Gilgit Baltistan Lab Expansion</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        
+        body { background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%); min-height: 100vh; padding: 20px; }
+        
+        .app-container { max-width: 1600px; margin: 0 auto; }
+        
+        .header { background: white; padding: 20px 30px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header h1 { color: #1a5276; font-size: 22px; margin-bottom: 5px; }
+        .header .subtitle { color: #666; font-size: 14px; }
+        .header .meta { display: flex; gap: 30px; margin-top: 15px; }
+        .header .meta-item { display: flex; align-items: center; gap: 8px; color: #666; }
+        .header .meta-item i { color: #2980b9; }
+        
+        .project-map { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .project-map h2 { color: #1a5276; margin-bottom: 15px; }
+        .locations-display { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+        .location-card { background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 10px; text-align: center; min-width: 200px; border-left: 4px solid #2980b9; }
+        .location-card.main { border-left-color: #27ae60; }
+        .location-card.stat { border-left-color: #f39c12; }
+        .location-card.collection { border-left-color: #9b59b6; }
+        .location-card .icon { font-size: 36px; margin-bottom: 10px; }
+        .location-card .name { font-weight: bold; color: #333; }
+        .location-card .type { font-size: 12px; color: #666; }
+        .location-card .distance { font-size: 11px; color: #e74c3c; margin-top: 5px; }
+        
+        .connection-line { display: flex; align-items: center; color: #666; font-size: 12px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        .stat-card .icon { font-size: 28px; margin-bottom: 8px; }
+        .stat-card .value { font-size: 24px; font-weight: bold; color: #1a5276; }
+        .stat-card .label { color: #666; font-size: 12px; }
+        .stat-card.warning { border-left: 4px solid #f39c12; }
+        .stat-card.danger { border-left: 4px solid #e74c3c; }
+        .stat-card.success { border-left: 4px solid #27ae60; }
+        
+        .notification-banner { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; display: none; animation: pulse 2s infinite; }
+        .notification-banner.show { display: block; }
+        .notification-banner h3 { margin-bottom: 10px; }
+        .notification-banner ul { list-style: none; }
+        .notification-banner li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: space-between; }
+        
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); } 50% { box-shadow: 0 0 0 10px rgba(231,76,60,0); } }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab { background: rgba(255,255,255,0.3); color: white; padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.3s; }
+        .tab.active { background: white; color: #1a5276; font-weight: bold; }
+        .tab:hover { background: rgba(255,255,255,0.5); }
+        
+        .content-section { display: none; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .content-section.active { display: block; }
+        
+        .phase-progress { margin-bottom: 20px; }
+        .phase-bar { display: flex; height: 30px; border-radius: 15px; overflow: hidden; background: #e0e0e0; }
+        .phase-segment { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; transition: 0.3s; }
+        .phase-1 { background: #3498db; width: 20%; }
+        .phase-2 { background: #9b59b6; width: 20%; }
+        .phase-3 { background: #f39c12; width: 20%; }
+        .phase-4 { background: #e74c3c; width: 20%; }
+        .phase-5 { background: #27ae60; width: 20%; }
+        .phase-labels { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10px; color: #666; }
+        
+        .location-section { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .location-section h3 { color: #1a5276; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #1a5276; color: white; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        
+        .status-badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-progress { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-overdue { background: #f8d7da; color: #721c24; }
+        
+        .priority-high { color: #e74c3c; font-weight: bold; }
+        .priority-medium { color: #f39c12; }
+        .priority-low { color: #27ae60; }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; color: #333; font-weight: 500; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; }
+        
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; }
+        .btn-primary { background: #1a5276; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h2 { color: #1a5276; font-size: 18px; }
+        .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #666; }
+        
+        .action-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 11px; }
+        .action-edit { background: #3498db; color: white; }
+        .action-delete { background: #e74c3c; color: white; }
+        
+        .reminder-badge { background: #e74c3c; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; margin-left: 5px; }
+        
+        .risk-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .risk-card { background: #fff5f5; border: 2px solid #e74c3c; padding: 15px; border-radius: 10px; }
+        .risk-card.medium { background: #fff8e6; border-color: #f39c12; }
+        .risk-card.low { background: #f0fff4; border-color: #27ae60; }
+        .risk-card h4 { color: #333; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .risk-card .risk-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 12px; }
+        .risk-card .risk-item:last-child { border: none; }
+        
+        .timeline { position: relative; padding-left: 25px; }
+        .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #ddd; }
+        .timeline-item { position: relative; padding-bottom: 15px; }
+        .timeline-item::before { content: ''; position: absolute; left: -21px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: #1a5276; }
+        .timeline-item.completed::before { background: #27ae60; }
+        .timeline-item.overdue::before { background: #e74c3c; }
+        
+        .search-box { display: flex; gap: 10px; margin-bottom: 12px; }
+        .search-box input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        
+        .chart-container { height: 220px; margin: 15px 0; }
+        
+        .weather-alert { background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .weather-alert i { font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🏥 GB Healthcare Project - Gilgit Baltistan</h1>
+            <p class="subtitle">Lab Upgradation & Establishment Project</p>
+            <div class="meta">
+                <div class="meta-item"><i class="fas fa-calendar"></i> Start: April 1, 2026</div>
+                <div class="meta-item"><i class="fas fa-clock"></i> Duration: 4-5 Months</div>
+                <div class="meta-item"><i class="fas fa-map-marker-alt"></i> Region: Gilgit-Baltistan</div>
+            </div>
+        </div>
+        
+        
+        <div class="project-map">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h2>📍 Project Locations</h2>
+                <button class="btn btn-primary" onclick="openModal('editLocationsModal')"><i class="fas fa-edit"></i> Edit Locations</button>
+            </div>
+            <div class="locations-display">
+                <div class="location-card main">
+                    <div class="icon">🏥</div>
+                    <div class="name" id="loc1Name">Gilgit City</div>
+                    <div class="type" id="loc1Type">Main Lab (Upgrade)</div>
+                    <div class="distance">Existing Facility</div>
+                </div>
+                <div class="connection-line">
+                    <i class="fas fa-arrow-right"></i> <span id="loc1Time">2 hours</span>
+                </div>
+                <div class="location-card stat">
+                    <div class="icon">🔬</div>
+                    <div class="name" id="loc2Name">Skardu City</div>
+                    <div class="type" id="loc2Type">STAT Lab (New)</div>
+                    <div class="distance">New Establishment</div>
+                </div>
+                <div class="connection-line">
+                    <i class="fas fa-arrow-right"></i> <span id="loc2Time">4 hours</span>
+                </div>
+                <div class="location-card collection">
+                    <div class="icon">🏠</div>
+                    <div class="name" id="loc3Name">Shigar</div>
+                    <div class="type" id="loc3Type">Collection Point</div>
+                    <div class="distance" id="loc3Distance">Remote Area</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="phase-progress">
+            <div class="phase-bar">
+                <div class="phase-segment phase-1" id="phase1Bar">20%</div>
+                <div class="phase-segment phase-2" id="phase2Bar">20%</div>
+                <div class="phase-segment phase-3" id="phase3Bar">20%</div>
+                <div class="phase-segment phase-4" id="phase4Bar">20%</div>
+                <div class="phase-segment phase-5" id="phase5Bar">20%</div>
+            </div>
+            <div class="phase-labels">
+                <span>Phase 1: Site</span>
+                <span>Phase 2: Renovation</span>
+                <span>Phase 3: Procurement</span>
+                <span>Phase 4: Installation</span>
+                <span>Phase 5: Staff & Training</span>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card"><div class="icon">📋</div><div class="value" id="totalTasks">0</div><div class="label">Total Tasks</div></div>
+            <div class="stat-card success"><div class="icon">✓</div><div class="value" id="completedTasks">0</div><div class="label">Completed</div></div>
+            <div class="stat-card warning"><div class="icon">⏳</div><div class="value" id="pendingTasks">0</div><div class="label">In Progress</div></div>
+            <div class="stat-card danger"><div class="icon">⚠️</div><div class="value" id="overdueTasks">0</div><div class="label">Overdue</div></div>
+            <div class="stat-card"><div class="icon">📍</div><div class="value" id="activeLocations">3</div><div class="label">Locations</div></div>
+        </div>
+        
+        <div class="notification-banner" id="notificationBanner">
+            <h3>🚨 OVERDUE & DUE SOON - ACTION REQUIRED</h3>
+            <ul id="notificationList"></ul>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('risks')">⚠️ Risks & Mitigation</button>
+            <button class="tab" onclick="showTab('site')">📍 Site Assessment</button>
+            <button class="tab" onclick="showTab('renovation')">🔨 Renovation</button>
+            <button class="tab" onclick="showTab('equipment')">🔧 Equipment</button>
+            <button class="tab" onclick="showTab('supplies')">📦 Supplies</button>
+            <button class="tab" onclick="showTab('software')">💻 Software</button>
+            <button class="tab" onclick="showTab('staff')">👥 Staff & Training</button>
+            <button class="tab" onclick="showTab('timeline')">📅 Timeline</button>
+        </div>
+        
+        <!-- Dashboard -->
+        <div class="content-section active" id="dashboard">
+            <h2>Project Overview</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="chart-container"><canvas id="progressChart"></canvas></div>
+                <div class="chart-container"><canvas id="locationChart"></canvas></div>
+            </div>
+            <div class="location-section">
+                <h3>📍 Location-wise Progress</h3>
+                <table id="locationTable">
+                    <thead><tr><th>Location</th><th>Type</th><th>Phase</th><th>Progress</th><th>Status</th></tr></thead>
+                    <tbody id="locationTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Risks -->
+        <div class="content-section" id="risks">
+            <h2>⚠️ Risk Assessment & Mitigation</h2>
+            <div class="risk-matrix">
+                <div class="risk-card">
+                    <h4><i class="fas fa-exclamation-circle" style="color: #e74c3c;"></i> HIGH RISKS</h4>
+                    <div class="risk-item"><span>Weather/Snow Closure</span><span class="priority-high">Mitigation</span></div>
+                    <div class="risk-item">Winter (Nov-Feb) road closures<div>Plan deliveries in summer; buffer time</div></div>
+                    <div class="risk-item">Landslides<div>Alternative routes identified</div></div>
+                    <div class="risk-item"><span>Supply Chain Breakage</span><div>Stock 2-month buffer supply</div></div>
+                    <div class="risk-item">Equipment transport damage<div>Extra packaging; local agent</div></div>
+                </div>
+                <div class="risk-card medium">
+                    <h4><i class="fas fa-exclamation-triangle" style="color: #f39c12;"></i> MEDIUM RISKS</h4>
+                    <div class="risk-item"><span>Power Outages</span><span class="priority-medium">Mitigation</span></div>
+                    <div class="risk-item">Load shedding common<div>Solar + UPS backup planned</div></div>
+                    <div class="risk-item">Grid instability<div>Voltage stabilizers</div></div>
+                    <div class="risk-item"><span>Staff Shortage</span><div>Remote area challenges</div></div>
+                    <div class="risk-item">Limited skilled labor<div>Training program; incentives</div></div>
+                </div>
+                <div class="risk-card low">
+                    <h4><i class="fas fa-info-circle" style="color: #27ae60;"></i> MONITORING RISKS</h4>
+                    <div class="risk-item"><span>Communication</span><span class="priority-low">Mitigation</span></div>
+                    <div class="risk-item">Limited internet<div>Satellite phones; offline capability</div></div>
+                    <div class="risk-item">Network downtime<div>Multiple providers</div></div>
+                    <div class="risk-item"><span>Customs/Delays</span><div>Start early; documentation</div></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="openModal('addRiskModal')"><i class="fas fa-plus"></i> Add Risk</button>
+            </div>
+            <table id="riskTable">
+                <thead><tr><th>Risk</th><th>Category</th><th>Impact</th><th>Probability</th><th>Mitigation</th><th>Actions</th></tr></thead>
+                <tbody id="riskTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Site Assessment -->
+        <div class="content-section" id="site">
+            <h2>📍 Site Assessment & Identification</h2>
+            <button class="btn btn-primary" onclick="openModal('addSiteModal')"><i class="fas fa-plus"></i> Add Site</button>
+            <table>
+                <thead><tr><th>Location</th><th>Type</th><th>Space (sq ft)</th><th>Status</th><th>Assessment Date</th><th>Actions</th></tr></thead>
+                <tbody id="siteTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Renovation -->
+        <div class="content-section" id="renovation">
+            <h2>🔨 Renovation Works</h2>
+            <button class="btn btn-primary" onclick="openModal('addRenovationModal')"><i class="fas fa-plus"></i> Add Renovation Task</button>
+            <table>
+                <thead><tr><th>Location</th><th>Work Type</th><th>Description</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead>
+                <tbody id="renovationTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Equipment -->
+        <div class="content-section" id="equipment">
+            <h2>🔧 Equipment Procurement & Installation</h2>
+            <button class="btn btn-primary" onclick="openModal('addEquipmentModal')"><i class="fas fa-plus"></i> Add Equipment</button>
+            <div class="search-box">
+                <input type="text" id="equipmentSearch" placeholder="Search equipment..." onkeyup="filterTable('equipmentTable', 1)">
+                <select id="equipmentFilter" onchange="renderEquipmentTable()"><option value="all">All</option><option value="Gilgit">Gilgit</option><option value="Skardu">Skardu</option><option value="Shigar">Shigar</option></select>
+            </div>
+            <table id="equipmentTable">
+                <thead><tr><th>Equipment</th><th>Location</th><th>Qty</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead>
+                <tbody id="equipmentTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Supplies -->
+        <div class="content-section" id="supplies">
+            <h2>📦 Supplies & Consumables</h2>
+            <button class="btn btn-primary" onclick="openModal('addSupplyModal')"><i class="fas fa-plus"></i> Add Supply</button>
+            <table>
+                <thead><tr><th>Item</th><th>Category</th><th>Location</th><th>Qty</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead>
+                <tbody id="supplyTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Software -->
+        <div class="content-section" id="software">
+            <h2>💻 Software System Installation</h2>
+            <button class="btn btn-primary" onclick="openModal('addSoftwareModal')"><i class="fas fa-plus"></i> Add Software Task</button>
+            <table>
+                <thead><tr><th>Software</th><th>Location</th><th>Type</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead>
+                <tbody id="softwareTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Staff -->
+        <div class="content-section" id="staff">
+            <h2>👥 Staff Hiring & Training</h2>
+            <button class="btn btn-primary" onclick="openModal('addStaffModal')"><i class="fas fa-plus"></i> Add Staff Position</button>
+            <table>
+                <thead><tr><th>Position</th><th>Location</th><th>Department</th><th>Status</th><th>Training</th><th>Deadline</th><th>Actions</th></tr></thead>
+                <tbody id="staffTableBody"></tbody>
+            </table>
+        </div>
+        
+        <!-- Timeline -->
+        <div class="content-section" id="timeline">
+            <h2>📅 Project Timeline</h2>
+            <div class="timeline" id="timelineContainer"></div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal" id="addSiteModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Site</h2><button class="modal-close" onclick="closeModal('addSiteModal')">&times;</button></div>
+            <div class="form-group"><label>Location Name</label><input type="text" id="siteName"></div>
+            <div class="form-group"><label>Type</label><select id="siteType"><option value="Main Lab">Main Lab (Upgrade)</option><option value="STAT Lab">STAT Lab (New)</option><option value="Collection Point">Collection Point</option></select></div>
+            <div class="form-group"><label>Space (sq ft)</label><input type="text" id="siteSpace"></div>
+            <div class="form-group"><label>Status</label><select id="siteStatus"><option value="Identified">Identified</option><option value="Under Assessment">Under Assessment</option><option value="Approved">Approved</option></select></div>
+            <div class="form-group"><label>Assessment Date</label><input type="date" id="siteDate"></div>
+            <button class="btn btn-primary" onclick="addSite()">Add Site</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addRenovationModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Renovation Task</h2><button class="modal-close" onclick="closeModal('addRenovationModal')">&times;</button></div>
+            <div class="form-group"><label>Location</label><select id="renoLocation"><option value="Gilgit">Gilgit (Main Lab)</option><option value="Skardu">Skardu (STAT Lab)</option><option value="Shigar">Shigar (Collection Point)</option></select></div>
+            <div class="form-group"><label>Work Type</label><select id="renoType"><option>Civil Work</option><option>Electrical</option><option>Plumbing</option><option>HVAC</option><option>Interior</option></select></div>
+            <div class="form-group"><label>Description</label><input type="text" id="renoDesc"></div>
+            <div class="form-group"><label>Status</label><select id="renoStatus"><option value="Pending">Pending</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option></select></div>
+            <div class="form-group"><label>Deadline</label><input type="date" id="renoDeadline"></div>
+            <button class="btn btn-primary" onclick="addRenovation()">Add Task</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addEquipmentModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Equipment</h2><button class="modal-close" onclick="closeModal('addEquipmentModal')">&times;</button></div>
+            <div class="form-group"><label>Equipment Name</label><input type="text" id="equipName"></div>
+            <div class="form-group"><label>Location</label><select id="equipLocation"><option value="Gilgit">Gilgit</option><option value="Skardu">Skardu</option><option value="Shigar">Shigar</option></select></div>
+            <div class="form-group"><label>Quantity</label><input type="number" id="equipQty" value="1" min="1"></div>
+            <div class="form-group"><label>Status</label><select id="equipStatus"><option value="Ordered">Ordered</option><option value="In Transit">In Transit</option><option value="Delivered">Delivered</option><option value="Installed">Installed</option></select></div>
+            <div class="form-group"><label>Deadline</label><input type="date" id="equipDeadline"></div>
+            <button class="btn btn-primary" onclick="addEquipment()">Add Equipment</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addSupplyModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Supply</h2><button class="modal-close" onclick="closeModal('addSupplyModal')">&times;</button></div>
+            <div class="form-group"><label>Item Name</label><input type="text" id="supplyName"></div>
+            <div class="form-group"><label>Category</label><select id="supplyCategory"><option>Lab Consumables</option><option>Pharmacy Medicine</option><option>Stationary</option><option>Medical Supplies</option></select></div>
+            <div class="form-group"><label>Location</label><select id="supplyLocation"><option value="Gilgit">Gilgit</option><option value="Skardu">Skardu</option><option value="Shigar">Shigar</option><option value="Central Store">Central Store</option></select></div>
+            <div class="form-group"><label>Quantity</label><input type="number" id="supplyQty" value="1" min="1"></div>
+            <div class="form-group"><label>Status</label><select id="supplyStatus"><option value="To Procure">To Procure</option><option value="Procured">Procured</option><option value="Delivered">Delivered</option></select></div>
+            <div class="form-group"><label>Deadline</label><input type="date" id="supplyDeadline"></div>
+            <button class="btn btn-primary" onclick="addSupply()">Add Supply</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addSoftwareModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Software Task</h2><button class="modal-close" onclick="closeModal('addSoftwareModal')">&times;</button></div>
+            <div class="form-group"><label>Software Name</label><input type="text" id="softName"></div>
+            <div class="form-group"><label>Location</label><select id="softLocation"><option value="Gilgit">Gilgit</option><option value="Skardu">Skardu</option><option value="Shigar">Shigar</option><option value="All Locations">All Locations</option></select></div>
+            <div class="form-group"><label>Type</label><select id="softType"><option>LIS System</option><option>PACS</option><option>HMS</option><option>Network Setup</option><option>Training</option></select></div>
+            <div class="form-group"><label>Status</label><select id="softStatus"><option value="Planning">Planning</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option></select></div>
+            <div class="form-group"><label>Deadline</label><input type="date" id="softDeadline"></div>
+            <button class="btn btn-primary" onclick="addSoftware()">Add Task</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addStaffModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Staff Position</h2><button class="modal-close" onclick="closeModal('addStaffModal')">&times;</button></div>
+            <div class="form-group"><label>Position</label><input type="text" id="staffPos"></div>
+            <div class="form-group"><label>Location</label><select id="staffLoc"><option value="Gilgit">Gilgit</option><option value="Skardu">Skardu</option><option value="Shigar">Shigar</option></select></div>
+            <div class="form-group"><label>Department</label><select id="staffDept"><option>Laboratory</option><option>Pharmacy</option><option>Administration</option><option>Sample Collection</option></select></div>
+            <div class="form-group"><label>Status</label><select id="staffStatus"><option value="To Hire">To Hire</option><option value="Interview">Interview</option><option value="Selected">Selected</option><option value="Joined">Joined</option></select></div>
+            <div class="form-group"><label>Training</label><select id="staffTraining"><option>Not Started</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option></select></div>
+            <div class="form-group"><label>Deadline</label><input type="date" id="staffDeadline"></div>
+            <button class="btn btn-primary" onclick="addStaff()">Add Position</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addRiskModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add Risk</h2><button class="modal-close" onclick="closeModal('addRiskModal')">&times;</button></div>
+            <div class="form-group"><label>Risk Description</label><input type="text" id="riskDesc"></div>
+            <div class="form-group"><label>Category</label><select id="riskCat"><option>Weather</option><option>Logistics</option><option>Supply Chain</option><option>Staffing</option><option>Technical</option><option>Financial</option></select></div>
+            <div class="form-group"><label>Impact</label><select id="riskImpact"><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
+            <div class="form-group"><label>Probability</label><select id="riskProb"><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
+            <div class="form-group"><label>Mitigation Plan</label><textarea id="riskMit" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;" rows="3"></textarea></div>
+            <button class="btn btn-primary" onclick="addRisk()">Add Risk</button>
+        </div>
+    </div>
+    
+    <!-- Edit Risk Modal -->
+    <div class="modal" id="editRiskModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Edit Risk</h2><button class="modal-close" onclick="closeModal('editRiskModal')">&times;</button></div>
+            <input type="hidden" id="editRiskId">
+            <div class="form-group"><label>Risk Description</label><input type="text" id="editRiskDesc"></div>
+            <div class="form-group"><label>Category</label><select id="editRiskCat"><option>Weather</option><option>Logistics</option><option>Infrastructure</option><option>Staffing</option><option>Technical</option><option>Financial</option><option>Safety</option><option>Environmental</option><option>Health</option></select></div>
+            <div class="form-group"><label>Impact</label><select id="editRiskImpact"><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
+            <div class="form-group"><label>Probability</label><select id="editRiskProb"><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
+            <div class="form-group"><label>Mitigation Plan</label><textarea id="editRiskMit" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;" rows="3"></textarea></div>
+            <button class="btn btn-primary" onclick="saveRiskEdit()">Save Changes</button>
+        </div>
+    </div>
+    
+    <!-- Edit Locations Modal -->
+    <div class="modal" id="editLocationsModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Edit Project Locations</h2><button class="modal-close" onclick="closeModal('editLocationsModal')">&times;</button></div>
+            
+            <h4 style="color:#1a5276;margin:15px 0 10px;">Location 1 (Main Lab)</h4>
+            <div class="form-group"><label>City Name</label><input type="text" id="editLoc1Name" value="Gilgit City"></div>
+            <div class="form-group"><label>Type</label><select id="editLoc1Type"><option value="Main Lab (Upgrade)">Main Lab (Upgrade)</option><option value="Main Lab (New)">Main Lab (New)</option><option value="STAT Lab (New)">STAT Lab (New)</option><option value="Collection Point">Collection Point</option></select></div>
+            
+            <h4 style="color:#1a5276;margin:15px 0 10px;">Location 2 (STAT Lab)</h4>
+            <div class="form-group"><label>City Name</label><input type="text" id="editLoc2Name" value="Skardu City"></div>
+            <div class="form-group"><label>Type</label><select id="editLoc2Type"><option value="STAT Lab (New)">STAT Lab (New)</option><option value="Main Lab (Upgrade)">Main Lab (Upgrade)</option><option value="Main Lab (New)">Main Lab (New)</option><option value="Collection Point">Collection Point</option></select></div>
+            <div class="form-group"><label>Distance from Location 1 (hours)</label><input type="text" id="editLoc2Time" value="2 hours"></div>
+            
+            <h4 style="color:#1a5276;margin:15px 0 10px;">Location 3 (Collection Point)</h4>
+            <div class="form-group"><label>City Name</label><input type="text" id="editLoc3Name" value="Shigar"></div>
+            <div class="form-group"><label>Type</label><select id="editLoc3Type"><option value="Collection Point">Collection Point</option><option value="Main Lab (Upgrade)">Main Lab (Upgrade)</option><option value="STAT Lab (New)">STAT Lab (New)</option><option value="Main Lab (New)">Main Lab (New)</option></select></div>
+            <div class="form-group"><label>Distance from Location 2 (hours)</label><input type="text" id="editLoc3Time" value="4 hours"></div>
+            <div class="form-group"><label>Location Description</label><input type="text" id="editLoc3Distance" value="Remote Area"></div>
+            
+            <button class="btn btn-primary" onclick="saveLocationChanges()">Save Changes</button>
+        </div>
+    </div>
+    
+    <script>
+        let sites = JSON.parse(localStorage.getItem('sites')) || [];
+        let renovations = JSON.parse(localStorage.getItem('renovations')) || [];
+        let equipment = JSON.parse(localStorage.getItem('gbequipment')) || [];
+        let supplies = JSON.parse(localStorage.getItem('gbsupplies')) || [];
+        let software = JSON.parse(localStorage.getItem('gbsoftware')) || [];
+        let staff = JSON.parse(localStorage.getItem('gbstaff')) || [];
+        let risks = JSON.parse(localStorage.getItem('risks')) || [
+            { id: 1, desc: 'Winter Road Closures (Nov-Feb)', category: 'Weather', impact: 'High', probability: 'High', mitigation: 'Schedule all deliveries during summer months (April-Oct). Maintain 2-month buffer stock for critical supplies.' },
+            { id: 2, desc: 'Landslides / Road Blockages', category: 'Weather', impact: 'High', probability: 'Medium', mitigation: 'Identify alternative routes. Have emergency contact numbers. deliveries Plan during daylight hours only.' },
+            { id: 3, desc: 'Heavy Snow Affecting Transport', category: 'Weather', impact: 'High', probability: 'High', mitigation: 'Use weather-proof packaging. Pre-position critical items. Have local inventory buffer.' },
+            { id: 4, desc: 'Supply Chain Disruption', category: 'Logistics', impact: 'High', probability: 'Medium', mitigation: 'Maintain 2-month buffer stock. Have backup suppliers identified. Order early.' },
+            { id: 5, desc: 'Equipment Transport Damage', category: 'Logistics', impact: 'High', probability: 'Medium', mitigation: 'Use extra padding/insurance. Hire professional medical equipment transporters. Inspect on arrival.' },
+            { id: 6, desc: 'Customs Clearance Delays', category: 'Logistics', impact: 'Medium', probability: 'High', mitigation: 'Start customs process early. Prepare all documentation in advance. Use experienced clearing agent.' },
+            { id: 7, desc: 'Power Outages / Load Shedding', category: 'Infrastructure', impact: 'High', probability: 'High', mitigation: 'Install solar power system. Have UPS backup for all critical equipment. Voltage stabilizers for all devices.' },
+            { id: 8, desc: 'Poor Internet / Network Connectivity', category: 'Infrastructure', impact: 'Medium', probability: 'High', mitigation: 'Install satellite internet as backup. Use offline-capable software. Have multiple service providers.' },
+            { id: 9, desc: 'Limited Skilled Staff Availability', category: 'Staffing', impact: 'High', probability: 'High', mitigation: 'Start recruitment early. Offer competitive salaries. Provide accommodation. Training program for local staff.' },
+            { id: 10, desc: 'Staff Reluctance to Join Remote Area', category: 'Staffing', impact: 'High', probability: 'High', mitigation: 'Offer hardship allowances. Provide housing. Career growth opportunities. Transport allowance.' },
+            { id: 11, desc: 'Language Barriers with Local Staff', category: 'Staffing', impact: 'Low', probability: 'Medium', mitigation: 'Language training program. Bilingual signage. Local staff as interpreters.' },
+            { id: 12, desc: 'Equipment Calibration Issues', category: 'Technical', impact: 'Medium', probability: 'Low', mitigation: 'Remote calibration support. Annual maintenance contract. Train local staff on basic calibration.' },
+            { id: 13, desc: 'Software Installation Challenges', category: 'Technical', impact: 'Medium', probability: 'Medium', mitigation: 'Cloud-based solutions with offline capability. Local IT support team. Comprehensive training.' },
+            { id: 14, desc: 'Budget Overrun', category: 'Financial', impact: 'High', probability: 'Medium', mitigation: '10% contingency budget. Regular budget reviews. Prioritize essential items.' },
+            { id: 15, desc: 'Currency Fluctuation', category: 'Financial', impact: 'Medium', probability: 'Medium', mitigation: 'Budget in local currency. Hedge if possible. Order early to lock prices.' },
+            { id: 16, desc: 'Security Concerns in Remote Area', category: 'Safety', impact: 'Medium', probability: 'Low', mitigation: 'Coordinate with local authorities. Security personnel. Safe transport for staff.' },
+            { id: 17, desc: 'Medical Waste Disposal', category: 'Environmental', impact: 'Medium', probability: 'Low', mitigation: 'Follow provincial regulations. Tie-up with certified waste management company. Staff training.' },
+            { id: 18, desc: 'Altitude Sickness for New Staff', category: 'Health', impact: 'Low', probability: 'Medium', mitigation: 'Acclimatization period. Medical checkups. Emergency medical protocol.' }
+        ];
+        
+        setInterval(checkNotifications, 60000);
+        checkNotifications();
+        
+        function saveData() {
+            localStorage.setItem('sites', JSON.stringify(sites));
+            localStorage.setItem('renovations', JSON.stringify(renovations));
+            localStorage.setItem('gbequipment', JSON.stringify(equipment));
+            localStorage.setItem('gbsupplies', JSON.stringify(supplies));
+            localStorage.setItem('gbsoftware', JSON.stringify(software));
+            localStorage.setItem('gbstaff', JSON.stringify(staff));
+            localStorage.setItem('risks', JSON.stringify(risks));
+            updateDashboard();
+        }
+        
+        function saveLocationChanges() {
+            document.getElementById('loc1Name').textContent = document.getElementById('editLoc1Name').value;
+            document.getElementById('loc1Type').textContent = document.getElementById('editLoc1Type').value;
+            document.getElementById('loc2Name').textContent = document.getElementById('editLoc2Name').value;
+            document.getElementById('loc2Type').textContent = document.getElementById('editLoc2Type').value;
+            document.getElementById('loc1Time').textContent = document.getElementById('editLoc2Time').value;
+            document.getElementById('loc3Name').textContent = document.getElementById('editLoc3Name').value;
+            document.getElementById('loc3Type').textContent = document.getElementById('editLoc3Type').value;
+            document.getElementById('loc2Time').textContent = document.getElementById('editLoc3Time').value;
+            document.getElementById('loc3Distance').textContent = document.getElementById('editLoc3Distance').value;
+            closeModal('editLocationsModal');
+        }
+        
+        function updateDashboard() {
+            const total = sites.length + renovations.length + equipment.length + supplies.length + software.length + staff.length;
+            const completed = sites.filter(s => s.status === 'Approved').length + renovations.filter(r => r.status === 'Completed').length + 
+                           equipment.filter(e => e.status === 'Installed').length + supplies.filter(s => s.status === 'Delivered').length +
+                           software.filter(s => s.status === 'Completed').length + staff.filter(s => s.status === 'Joined').length;
+            const pending = total - completed;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('pendingTasks').textContent = pending;
+            document.getElementById('overdueTasks').textContent = 0;
+            
+            renderAll();
+            updateCharts();
+        }
+        
+        function checkNotifications() {
+            const today = new Date();
+            const notifications = [];
+            
+            [...renovations, ...equipment, ...supplies, ...software, ...staff].forEach(item => {
+                if (item.deadline) {
+                    const deadline = new Date(item.deadline);
+                    const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                    const isComplete = item.status === 'Completed' || item.status === 'Installed' || item.status === 'Delivered' || item.status === 'Joined';
+                    
+                    if (diffDays < 0 && !isComplete) notifications.push({ title: item.name || item.desc || item.position, days: diffDays, type: 'overdue' });
+                    else if (diffDays === 0 && !isComplete) notifications.push({ title: item.name || item.desc || item.position, days: 0, type: 'today' });
+                    else if (diffDays > 0 && diffDays <= 3 && !isComplete) notifications.push({ title: item.name || item.desc || item.position, days: diffDays, type: 'upcoming' });
+                }
+            });
+            
+            const banner = document.getElementById('notificationBanner');
+            const list = document.getElementById('notificationList');
+            
+            if (notifications.length > 0) {
+                banner.classList.add('show');
+                list.innerHTML = notifications.map(n => `<li><span>${n.title}</span><span class="reminder-badge">${n.type === 'overdue' ? Math.abs(n.days) + ' days overdue' : n.type === 'today' ? 'DUE TODAY!' : n.days + ' days left'}</span></li>`).join('');
+            } else banner.classList.remove('show');
+        }
+        
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        
+        function addSite() {
+            sites.push({ id: Date.now(), name: document.getElementById('siteName').value, type: document.getElementById('siteType').value, space: document.getElementById('siteSpace').value, status: document.getElementById('siteStatus').value, date: document.getElementById('siteDate').value });
+            saveData(); closeModal('addSiteModal');
+        }
+        
+        function addRenovation() {
+            renovations.push({ id: Date.now(), location: document.getElementById('renoLocation').value, type: document.getElementById('renoType').value, desc: document.getElementById('renoDesc').value, status: document.getElementById('renoStatus').value, deadline: document.getElementById('renoDeadline').value });
+            saveData(); closeModal('addRenovationModal');
+        }
+        
+        function addEquipment() {
+            equipment.push({ id: Date.now(), name: document.getElementById('equipName').value, location: document.getElementById('equipLocation').value, qty: document.getElementById('equipQty').value, status: document.getElementById('equipStatus').value, deadline: document.getElementById('equipDeadline').value });
+            saveData(); closeModal('addEquipmentModal');
+        }
+        
+        function addSupply() {
+            supplies.push({ id: Date.now(), name: document.getElementById('supplyName').value, category: document.getElementById('supplyCategory').value, location: document.getElementById('supplyLocation').value, qty: document.getElementById('supplyQty').value, status: document.getElementById('supplyStatus').value, deadline: document.getElementById('supplyDeadline').value });
+            saveData(); closeModal('addSupplyModal');
+        }
+        
+        function addSoftware() {
+            software.push({ id: Date.now(), name: document.getElementById('softName').value, location: document.getElementById('softLocation').value, type: document.getElementById('softType').value, status: document.getElementById('softStatus').value, deadline: document.getElementById('softDeadline').value });
+            saveData(); closeModal('addSoftwareModal');
+        }
+        
+        function addStaff() {
+            staff.push({ id: Date.now(), position: document.getElementById('staffPos').value, location: document.getElementById('staffLoc').value, department: document.getElementById('staffDept').value, status: document.getElementById('staffStatus').value, training: document.getElementById('staffTraining').value, deadline: document.getElementById('staffDeadline').value });
+            saveData(); closeModal('addStaffModal');
+        }
+        
+        function addRisk() {
+            risks.push({ id: Date.now(), desc: document.getElementById('riskDesc').value, category: document.getElementById('riskCat').value, impact: document.getElementById('riskImpact').value, probability: document.getElementById('riskProb').value, mitigation: document.getElementById('riskMit').value });
+            saveData(); closeModal('addRiskModal');
+        }
+        
+        function openEditRiskModal(id) {
+            const item = risks.find(r => r.id === id);
+            if (item) {
+                document.getElementById('editRiskId').value = item.id;
+                document.getElementById('editRiskDesc').value = item.desc;
+                document.getElementById('editRiskCat').value = item.category;
+                document.getElementById('editRiskImpact').value = item.impact;
+                document.getElementById('editRiskProb').value = item.probability;
+                document.getElementById('editRiskMit').value = item.mitigation;
+                openModal('editRiskModal');
+            }
+        }
+        
+        function saveRiskEdit() {
+            const id = parseInt(document.getElementById('editRiskId').value);
+            const item = risks.find(r => r.id === id);
+            if (item) {
+                item.desc = document.getElementById('editRiskDesc').value;
+                item.category = document.getElementById('editRiskCat').value;
+                item.impact = document.getElementById('editRiskImpact').value;
+                item.probability = document.getElementById('editRiskProb').value;
+                item.mitigation = document.getElementById('editRiskMit').value;
+                saveData();
+                closeModal('editRiskModal');
+            }
+        }
+        
+        // Edit Modals and Functions
+        function openEditSiteModal(id) {
+            const item = sites.find(s => s.id === id);
+            if (item) {
+                document.getElementById('editSiteId').value = item.id;
+                document.getElementById('editSiteName').value = item.name;
+                document.getElementById('editSiteType').value = item.type;
+                document.getElementById('editSiteSpace').value = item.space;
+                document.getElementById('editSiteStatus').value = item.status;
+                document.getElementById('editSiteDate').value = item.date;
+                openModal('editSiteModal');
+            }
+        }
+        
+        function saveSiteEdit() {
+            const id = parseInt(document.getElementById('editSiteId').value);
+            const item = sites.find(s => s.id === id);
+            if (item) {
+                item.name = document.getElementById('editSiteName').value;
+                item.type = document.getElementById('editSiteType').value;
+                item.space = document.getElementById('editSiteSpace').value;
+                item.status = document.getElementById('editSiteStatus').value;
+                item.date = document.getElementById('editSiteDate').value;
+                saveData();
+                closeModal('editSiteModal');
+            }
+        }
+        
+        function openEditRenovationModal(id) {
+            const item = renovations.find(r => r.id === id);
+            if (item) {
+                document.getElementById('editRenoId').value = item.id;
+                document.getElementById('editRenoLocation').value = item.location;
+                document.getElementById('editRenoType').value = item.type;
+                document.getElementById('editRenoDesc').value = item.desc;
+                document.getElementById('editRenoStatus').value = item.status;
+                document.getElementById('editRenoDeadline').value = item.deadline;
+                openModal('editRenovationModal');
+            }
+        }
+        
+        function saveRenovationEdit() {
+            const id = parseInt(document.getElementById('editRenoId').value);
+            const item = renovations.find(r => r.id === id);
+            if (item) {
+                item.location = document.getElementById('editRenoLocation').value;
+                item.type = document.getElementById('editRenoType').value;
+                item.desc = document.getElementById('editRenoDesc').value;
+                item.status = document.getElementById('editRenoStatus').value;
+                item.deadline = document.getElementById('editRenoDeadline').value;
+                saveData();
+                closeModal('editRenovationModal');
+            }
+        }
+        
+        function openEditEquipmentModal(id) {
+            const item = equipment.find(e => e.id === id);
+            if (item) {
+                document.getElementById('editEquipId').value = item.id;
+                document.getElementById('editEquipName').value = item.name;
+                document.getElementById('editEquipLocation').value = item.location;
+                document.getElementById('editEquipQty').value = item.qty;
+                document.getElementById('editEquipStatus').value = item.status;
+                document.getElementById('editEquipDeadline').value = item.deadline;
+                openModal('editEquipmentModal');
+            }
+        }
+        
+        function saveEquipmentEdit() {
+            const id = parseInt(document.getElementById('editEquipId').value);
+            const item = equipment.find(e => e.id === id);
+            if (item) {
+                item.name = document.getElementById('editEquipName').value;
+                item.location = document.getElementById('editEquipLocation').value;
+                item.qty = document.getElementById('editEquipQty').value;
+                item.status = document.getElementById('editEquipStatus').value;
+                item.deadline = document.getElementById('editEquipDeadline').value;
+                saveData();
+                closeModal('editEquipmentModal');
+            }
+        }
+        
+        function openEditSupplyModal(id) {
+            const item = supplies.find(s => s.id === id);
+            if (item) {
+                document.getElementById('editSupplyId').value = item.id;
+                document.getElementById('editSupplyName').value = item.name;
+                document.getElementById('editSupplyCategory').value = item.category;
+                document.getElementById('editSupplyLocation').value = item.location;
+                document.getElementById('editSupplyQty').value = item.qty;
+                document.getElementById('editSupplyStatus').value = item.status;
+                document.getElementById('editSupplyDeadline').value = item.deadline;
+                openModal('editSupplyModal');
+            }
+        }
+        
+        function saveSupplyEdit() {
+            const id = parseInt(document.getElementById('editSupplyId').value);
+            const item = supplies.find(s => s.id === id);
+            if (item) {
+                item.name = document.getElementById('editSupplyName').value;
+                item.category = document.getElementById('editSupplyCategory').value;
+                item.location = document.getElementById('editSupplyLocation').value;
+                item.qty = document.getElementById('editSupplyQty').value;
+                item.status = document.getElementById('editSupplyStatus').value;
+                item.deadline = document.getElementById('editSupplyDeadline').value;
+                saveData();
+                closeModal('editSupplyModal');
+            }
+        }
+        
+        function openEditSoftwareModal(id) {
+            const item = software.find(s => s.id === id);
+            if (item) {
+                document.getElementById('editSoftId').value = item.id;
+                document.getElementById('editSoftName').value = item.name;
+                document.getElementById('editSoftLocation').value = item.location;
+                document.getElementById('editSoftType').value = item.type;
+                document.getElementById('editSoftStatus').value = item.status;
+                document.getElementById('editSoftDeadline').value = item.deadline;
+                openModal('editSoftwareModal');
+            }
+        }
+        
+        function saveSoftwareEdit() {
+            const id = parseInt(document.getElementById('editSoftId').value);
+            const item = software.find(s => s.id === id);
+            if (item) {
+                item.name = document.getElementById('editSoftName').value;
+                item.location = document.getElementById('editSoftLocation').value;
+                item.type = document.getElementById('editSoftType').value;
+                item.status = document.getElementById('editSoftStatus').value;
+                item.deadline = document.getElementById('editSoftDeadline').value;
+                saveData();
+                closeModal('editSoftwareModal');
+            }
+        }
+        
+        function openEditStaffModal(id) {
+            const item = staff.find(s => s.id === id);
+            if (item) {
+                document.getElementById('editStaffId').value = item.id;
+                document.getElementById('editStaffPos').value = item.position;
+                document.getElementById('editStaffLoc').value = item.location;
+                document.getElementById('editStaffDept').value = item.department;
+                document.getElementById('editStaffStatus').value = item.status;
+                document.getElementById('editStaffTraining').value = item.training;
+                document.getElementById('editStaffDeadline').value = item.deadline;
+                openModal('editStaffModal');
+            }
+        }
+        
+        function saveStaffEdit() {
+            const id = parseInt(document.getElementById('editStaffId').value);
+            const item = staff.find(s => s.id === id);
+            if (item) {
+                item.position = document.getElementById('editStaffPos').value;
+                item.location = document.getElementById('editStaffLoc').value;
+                item.department = document.getElementById('editStaffDept').value;
+                item.status = document.getElementById('editStaffStatus').value;
+                item.training = document.getElementById('editStaffTraining').value;
+                item.deadline = document.getElementById('editStaffDeadline').value;
+                saveData();
+                closeModal('editStaffModal');
+            }
+        }
+        
+        function deleteItem(arr, id) {
+            if (arr === 'sites') sites = sites.filter(s => s.id !== id);
+            else if (arr === 'renovations') renovations = renovations.filter(r => r.id !== id);
+            else if (arr === 'equipment') equipment = equipment.filter(e => e.id !== id);
+            else if (arr === 'supplies') supplies = supplies.filter(s => s.id !== id);
+            else if (arr === 'software') software = software.filter(s => s.id !== id);
+            else if (arr === 'staff') staff = staff.filter(s => s.id !== id);
+            else if (arr === 'risks') risks = risks.filter(r => r.id !== id);
+            saveData();
+        }
+        
+        function renderAll() {
+            document.getElementById('siteTableBody').innerHTML = sites.map(s => `<tr><td>${s.name}</td><td>${s.type}</td><td>${s.space}</td><td><span class="status-badge status-${s.status === 'Approved' ? 'completed' : s.status === 'Identified' ? 'pending' : 'progress'}">${s.status}</span></td><td>${s.date}</td><td><button class="action-btn action-edit" onclick="openEditSiteModal(${s.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('sites',${s.id})">Delete</button></td></tr>`).join('');
+            
+            document.getElementById('renovationTableBody').innerHTML = renovations.map(r => `<tr><td>${r.location}</td><td>${r.type}</td><td>${r.desc}</td><td><span class="status-badge status-${r.status === 'Completed' ? 'completed' : r.status === 'Pending' ? 'pending' : 'progress'}">${r.status}</span></td><td>${r.deadline}</td><td><button class="action-btn action-edit" onclick="openEditRenovationModal(${r.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('renovations',${r.id})">Delete</button></td></tr>`).join('');
+            
+            document.getElementById('equipmentTableBody').innerHTML = equipment.map(e => `<tr><td>${e.name}</td><td>${e.location}</td><td>${e.qty}</td><td><span class="status-badge status-${e.status === 'Installed' ? 'completed' : e.status === 'Ordered' ? 'pending' : 'progress'}">${e.status}</span></td><td>${e.deadline}</td><td><button class="action-btn action-edit" onclick="openEditEquipmentModal(${e.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('equipment',${e.id})">Delete</button></td></tr>`).join('');
+            
+            document.getElementById('supplyTableBody').innerHTML = supplies.map(s => `<tr><td>${s.name}</td><td>${s.category}</td><td>${s.location}</td><td>${s.qty}</td><td><span class="status-badge status-${s.status === 'Delivered' ? 'completed' : s.status === 'Procured' ? 'progress' : 'pending'}">${s.status}</span></td><td>${s.deadline}</td><td><button class="action-btn action-edit" onclick="openEditSupplyModal(${s.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('supplies',${s.id})">Delete</button></td></tr>`).join('');
+            
+            document.getElementById('softwareTableBody').innerHTML = software.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.type}</td><td><span class="status-badge status-${s.status === 'Completed' ? 'completed' : s.status === 'Planning' ? 'pending' : 'progress'}">${s.status}</span></td><td>${s.deadline}</td><td><button class="action-btn action-edit" onclick="openEditSoftwareModal(${s.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('software',${s.id})">Delete</button></td></tr>`).join('');
+            
+            document.getElementById('staffTableBody').innerHTML = staff.map(s => `<tr><td>${s.position}</td><td>${s.location}</td><td>${s.department}</td><td><span class="status-badge status-${s.status === 'Joined' ? 'completed' : s.status === 'To Hire' ? 'pending' : 'progress'}">${s.status}</span></td><td><span class="status-badge status-${s.training === 'Completed' ? 'completed' : s.training === 'Not Started' ? 'pending' : 'progress'}">${s.training}</span></td><td>${s.deadline}</td><td><button class="action-btn action-edit" onclick="openEditStaffModal(${s.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('staff',${s.id})">Delete</button></td></tr>`).join('');
+            
+            document.getElementById('riskTableBody').innerHTML = risks.map(r => `<tr><td>${r.desc}</td><td>${r.category}</td><td class="priority-${r.impact.toLowerCase()}">${r.impact}</td><td>${r.probability}</td><td>${r.mitigation}</td><td><button class="action-btn action-edit" onclick="openEditRiskModal(${r.id})">Edit</button><button class="action-btn action-delete" onclick="deleteItem('risks',${r.id})">Delete</button></td></tr>`).join('');
+            
+            const allItems = [
+                ...sites.map(s => ({...s, type: 'site'})),
+                ...renovations.map(r => ({...r, name: r.desc, type: 'renovation'})),
+                ...equipment.map(e => ({...e, type: 'equipment'})),
+                ...software.map(s => ({...s, type: 'software'})),
+                ...staff.map(s => ({...s, type: 'staff'}))
+            ].filter(i => i.deadline || i.date).sort((a, b) => new Date(a.deadline || a.date) - new Date(b.deadline || b.date));
+            
+            document.getElementById('timelineContainer').innerHTML = allItems.slice(0, 15).map(item => {
+                const date = item.deadline || item.date;
+                const isComplete = item.status === 'Completed' || item.status === 'Installed' || item.status === 'Joined' || item.status === 'Approved';
+                return `<div class="timeline-item ${isComplete ? 'completed' : ''}"><strong>${item.name || item.position}</strong><p>${item.type === 'site' ? item.type + ': ' + item.type : item.type === 'equipment' ? item.location : item.type === 'staff' ? item.department : item.type}</p><p>${date}</p></div>`;
+            }).join('');
+            
+            document.getElementById('locationTableBody').innerHTML = `
+                <tr><td>Gilgit City</td><td>Main Lab (Upgrade)</td><td>Phase 1-5</td><td><div style="background:#e0e0e0;height:10px;border-radius:5px;"><div style="background:#27ae60;height:100%;width:${sites.filter(s => s.name === 'Gilgit' && s.status === 'Approved').length > 0 ? 100 : 30}%;border-radius:5px;"></div></div></td><td>${sites.filter(s => s.name === 'Gilgit' && s.status === 'Approved').length > 0 ? '<span class="status-badge status-completed">Active</span>' : '<span class="status-badge status-progress">In Progress</span>'}</td></tr>
+                <tr><td>Skardu City</td><td>STAT Lab (New)</td><td>Phase 1-5</td><td><div style="background:#e0e0e0;height:10px;border-radius:5px;"><div style="background:#f39c12;height:100%;width:20%;border-radius:5px;"></div></div></td><td><span class="status-badge status-progress">Planning</span></td></tr>
+                <tr><td>Shigar Valley</td><td>Collection Point</td><td>Phase 2-4</td><td><div style="background:#e0e0e0;height:10px;border-radius:5px;"><div style="background:#9b59b6;height:100%;width:10%;border-radius:5px;"></div></div></td><td><span class="status-badge status-pending">Site Identification</span></td></tr>
+            `;
+        }
+        
+        let progressChart, locationChart;
+        
+        function updateCharts() {
+            const ctx1 = document.getElementById('progressChart').getContext('2d');
+            const ctx2 = document.getElementById('locationChart').getContext('2d');
+            
+            const phaseData = [
+                sites.filter(s => s.status === 'Approved').length,
+                renovations.filter(r => r.status === 'Completed').length,
+                equipment.filter(e => e.status === 'Delivered').length,
+                software.filter(s => s.status === 'Completed').length,
+                staff.filter(s => s.status === 'Joined').length
+            ];
+            
+            if (progressChart) progressChart.destroy();
+            progressChart = new Chart(ctx1, {
+                type: 'bar',
+                data: { labels: ['Site', 'Renovation', 'Equipment', 'Software', 'Staff'], datasets: [{ label: 'Completed', data: phaseData, backgroundColor: '#27ae60' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Phase-wise Completion' } } }
+            });
+            
+            if (locationChart) locationChart.destroy();
+            locationChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: { labels: ['Gilgit', 'Skardu', 'Shigar'], datasets: [{ data: [equipment.filter(e => e.location === 'Gilgit').length || 1, equipment.filter(e => e.location === 'Skardu').length || 1, equipment.filter(e => e.location === 'Shigar').length || 1], backgroundColor: ['#27ae60', '#f39c12', '#9b59b6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Equipment by Location' } } }
+            });
+        }
+        
+        function filterTable(tableId, col) {
+            const input = document.getElementById(tableId === 'equipmentTable' ? 'equipmentSearch' : 'supplySearch');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName('tr');
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td')[col];
+                if (td) tr[i].style.display = td.textContent.toUpperCase().indexOf(filter) > -1 ? '' : 'none';
+            }
+        }
+        
+        updateDashboard();
+    </script>
+</body>
+</html>
