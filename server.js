@@ -7,7 +7,9 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-console.log('PORT:', PORT);
+console.log('RAILWAY_PORT:', process.env.RAILWAY_PORT);
+console.log('PORT env:', process.env.PORT);
+console.log('Using port:', PORT);
 
 const db = new Database('qa_system.db');
 
