@@ -6,12 +6,13 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
-console.log('RAILWAY_PORT:', process.env.RAILWAY_PORT);
-console.log('PORT env:', process.env.PORT);
-console.log('Using port:', PORT);
+const PORT = process.env.PORT || process.env.RAILWAY_PORT || 8080;
+console.log('===== SERVER STARTING =====');
+console.log('PORT:', PORT);
+console.log('===== END SERVER START =====');
 
 const db = new Database('qa_system.db');
+console.log('Database created');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -121,6 +122,10 @@ app.get('/dashboard', requireAuth, (req, res) => {
 
 app.get('/', (req, res) => {
   res.redirect('/login');
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
 app.get('/api/diagnostic-centers', requireAdmin, (req, res) => {
